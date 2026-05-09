@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The RSI Loop — Two-Stage Validation</title>
+<meta name="description" content="Architecture diagram for The RSI Loop — a 1200×1200 image suitable for use as a LinkedIn share card.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;1,6..72,300;1,6..72,400&family=Inter:wght@300;400;500;600&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!--
+  This page is sized to be screenshotted at exactly 1200×1200 px, the
+  recommended square format for a LinkedIn image post.
+
+  Easiest capture methods on macOS:
+    1. Open in Safari / Chrome at any window size.
+    2. macOS:   Cmd-Shift-5 → "Capture Selected Portion" → drag the
+                .card frame.
+    3. Chrome:  Cmd-Opt-I → ⋮ → "Capture node screenshot" with .card
+                selected. Outputs an exact 1200×1200 PNG.
+    4. CLI:     npx puppeteer screenshot --selector .card --path og-card.png
+-->
+
+<style>
+:root {
+--ink: #0f1a2e;
+--paper: #ffffff;
+--off-white: #f7f8fa;
+--teal: #0d7377;
+--teal-light: #e6f3f3;
+--muted: #6b7b8d;
+--rule: #e2e5ea;
+--slate: #5b7a9d;
+--green: #2d7a4f;
+--grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+background: #ebedf0;  /* page chrome around the card; not part of the screenshot */
+font-family: 'Inter', sans-serif;
+color: var(--ink);
+-webkit-font-smoothing: antialiased;
+}
+
+body {
+display: flex;
+align-items: center;
+justify-content: center;
+min-height: 100vh;
+padding: 24px;
+}
+
+/* === THE CARD — exactly 1200×1200, screenshot-ready === */
+.card {
+width: 1200px;
+height: 1200px;
+background: var(--paper);
+padding: 88px 96px;
+display: flex;
+flex-direction: column;
+position: relative;
+overflow: hidden;
+box-shadow: 0 12px 48px rgba(15,26,46,0.08);
+}
+.card::after {
+content: '';
+position: absolute;
+inset: 0;
+background-image: var(--grain);
+background-size: 256px 256px;
+pointer-events: none;
+}
+.card > * { position: relative; z-index: 1; }
+
+/* === HEADER === */
+.head-kicker {
+font-family: 'Fira Code', monospace;
+font-size: 14px;
+font-weight: 500;
+letter-spacing: 0.22em;
+text-transform: uppercase;
+color: var(--teal);
+margin-bottom: 18px;
+}
+.head-title {
+font-family: 'Newsreader', serif;
+font-size: 60px;
+font-weight: 300;
+letter-spacing: -0.025em;
+line-height: 1.04;
+margin-bottom: 16px;
+color: var(--ink);
+max-width: 18ch;
+}
+.head-title strong {
+font-weight: 400;
+color: var(--teal);
+}
+.head-subtitle {
+font-family: 'Newsreader', serif;
+font-style: italic;
+font-size: 24px;
+color: var(--muted);
+font-weight: 300;
+line-height: 1.4;
+max-width: 36ch;
+}
+
+/* === PIPELINE === */
+.stages {
+flex: 1;
+display: flex;
+flex-direction: column;
+justify-content: center;
+gap: 14px;
+margin-top: 44px;
+}
+
+.stage {
+border: 1px solid var(--rule);
+border-radius: 10px;
+padding: 26px 32px 24px;
+background: var(--paper);
+}
+.stage.s1 { border-left: 5px solid var(--slate); }
+.stage.s2 { border-left: 5px solid var(--teal); }
+
+.stage-tag {
+font-family: 'Fira Code', monospace;
+font-size: 13px;
+font-weight: 500;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(--muted);
+margin-bottom: 10px;
+display: inline-flex;
+align-items: center;
+gap: 10px;
+}
+.stage-tag::before {
+content: '';
+width: 10px;
+height: 10px;
+border-radius: 50%;
+background: var(--slate);
+display: inline-block;
+}
+.stage.s2 .stage-tag::before { background: var(--teal); }
+
+.stage-q {
+font-family: 'Newsreader', serif;
+font-size: 32px;
+font-weight: 300;
+letter-spacing: -0.01em;
+margin-bottom: 16px;
+line-height: 1.15;
+}
+
+.stage-row {
+display: grid;
+grid-template-columns: 110px 1fr;
+gap: 6px 20px;
+font-size: 17px;
+line-height: 1.5;
+align-items: baseline;
+}
+.stage-row dt {
+font-family: 'Fira Code', monospace;
+font-size: 11px;
+font-weight: 500;
+letter-spacing: 0.18em;
+text-transform: uppercase;
+color: var(--teal);
+padding-top: 2px;
+}
+.stage-row dd { color: var(--ink); }
+.stage-row dd code {
+font-family: 'Fira Code', monospace;
+font-size: 15px;
+background: var(--off-white);
+padding: 2px 8px;
+border-radius: 3px;
+color: var(--ink);
+}
+
+.gate {
+margin-top: 16px;
+padding-top: 14px;
+border-top: 1px dashed var(--rule);
+display: flex;
+flex-wrap: wrap;
+gap: 8px 22px;
+align-items: baseline;
+font-size: 15px;
+}
+.gate-label {
+font-family: 'Fira Code', monospace;
+font-size: 11px;
+font-weight: 500;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(--ink);
+}
+.gate-cond {
+font-family: 'Fira Code', monospace;
+font-size: 15px;
+color: var(--ink);
+}
+.gate-pass {
+font-family: 'Fira Code', monospace;
+font-size: 14px;
+color: var(--green);
+}
+
+.arrow {
+text-align: center;
+font-size: 24px;
+color: #c8ced6;
+line-height: 1;
+font-family: 'Newsreader', serif;
+}
+
+.final {
+margin-top: 4px;
+padding: 18px 32px;
+border: 2px solid var(--green);
+background: rgba(45,122,79,0.06);
+border-radius: 10px;
+text-align: center;
+font-family: 'Fira Code', monospace;
+font-size: 19px;
+font-weight: 500;
+color: var(--green);
+letter-spacing: 0.07em;
+}
+
+/* === FOOTER === */
+.foot {
+margin-top: 28px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+font-family: 'Fira Code', monospace;
+font-size: 13px;
+color: var(--muted);
+letter-spacing: 0.04em;
+}
+.foot-left { display: flex; align-items: center; gap: 10px; }
+.foot-dot {
+width: 8px;
+height: 8px;
+border-radius: 50%;
+background: var(--teal);
+display: inline-block;
+}
+.foot-right { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+
+<header>
+<p class="head-kicker">The RSI Loop · Architecture</p>
+<h1 class="head-title">Two-stage validation for <strong>self-improving AI</strong></h1>
+<p class="head-subtitle">Accuracy can be optimised. Compliance cannot be self-certified.</p>
+</header>
+
+<main class="stages">
+
+<section class="stage s1">
+<p class="stage-tag">Stage 01 — Accuracy</p>
+<h2 class="stage-q">Does the detector classify posture correctly?</h2>
+<dl class="stage-row">
+<dt>Inputs</dt>  <dd><code>detector.py</code> + <code>benchmarks.json</code> (10 labelled scenarios)</dd>
+<dt>Output</dt>  <dd>accuracy · precision · recall · F1</dd>
+</dl>
+<div class="gate">
+<span class="gate-label">Gate</span>
+<span class="gate-cond">accuracy ≥ 90%</span>
+<span class="gate-pass">→ if PASS, hand off to Stage 2</span>
+</div>
+</section>
+
+<div class="arrow" aria-hidden="true">▼</div>
+
+<section class="stage s2">
+<p class="stage-tag">Stage 02 — Compliance</p>
+<h2 class="stage-q">Are the AI-tuned thresholds clinically plausible?</h2>
+<dl class="stage-row">
+<dt>Inputs</dt>  <dd>Live thresholds vs. Clinical Gold Standard (forward-head <code>15–25°</code>, wrist <code>40–60°</code>)</dd>
+<dt>Output</dt>  <dd>PASS · WARNING · HARD FAILURE per threshold</dd>
+</dl>
+<div class="gate">
+<span class="gate-label">Gate</span>
+<span class="gate-cond">every threshold = PASS</span>
+<span class="gate-pass">→ if PASS, accept the iteration</span>
+</div>
+</section>
+
+<div class="arrow" aria-hidden="true">▼</div>
+
+<div class="final">RSI LOOP STATUS: COMPLETE &nbsp; — &nbsp; accurate AND compliant</div>
+
+</main>
+
+<footer class="foot">
+<span class="foot-left"><span class="foot-dot" aria-hidden="true"></span>pharmatools.ai/rsi-loop</span>
+<span class="foot-right">github.com/nickjlamb/rsi-loop</span>
+</footer>
+
+</div>
+</body>
+</html>
