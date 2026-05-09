@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env
+
+# RSI Loop runtime artefacts
+last_run.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors / agents
+.idea/
+.vscode/
+.claude/
+*.swp
+*.swo
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/

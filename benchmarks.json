@@ -1,0 +1,146 @@
+{
+  "description": "Ground truth scenarios for RSI risk detection. Coordinates follow MediaPipe Pose/Hand normalized landmark conventions (x, y in image space, z relative depth). Each scenario provides the minimal landmarks needed by the detector.",
+  "schema": {
+    "landmarks": {
+      "ear": "Side-of-head landmark (MediaPipe Pose #7 or #8)",
+      "shoulder": "Shoulder landmark (MediaPipe Pose #11 or #12)",
+      "elbow": "Elbow landmark (MediaPipe Pose #13 or #14)",
+      "wrist": "Wrist landmark (MediaPipe Pose #15 or #16)",
+      "index_mcp": "Index finger MCP knuckle (MediaPipe Hand #5)",
+      "pinky_mcp": "Pinky finger MCP knuckle (MediaPipe Hand #17)"
+    },
+    "labels": ["Safe", "High Strain"]
+  },
+  "scenarios": [
+    {
+      "id": "S01_neutral_typing",
+      "label": "Safe",
+      "notes": "Neutral posture, head over shoulders, wrist aligned with forearm.",
+      "landmarks": {
+        "ear":       {"x": 0.50, "y": 0.20, "z": 0.0},
+        "shoulder":  {"x": 0.50, "y": 0.45, "z": 0.0},
+        "elbow":     {"x": 0.55, "y": 0.65, "z": 0.0},
+        "wrist":     {"x": 0.60, "y": 0.80, "z": 0.0},
+        "index_mcp": {"x": 0.66, "y": 0.83, "z": 0.0},
+        "pinky_mcp": {"x": 0.64, "y": 0.86, "z": 0.0}
+      }
+    },
+    {
+      "id": "S02_slight_forward_lean",
+      "label": "Safe",
+      "notes": "Mild forward lean (~12 deg) but within ergonomic tolerance.",
+      "landmarks": {
+        "ear":       {"x": 0.54, "y": 0.20, "z": 0.0},
+        "shoulder":  {"x": 0.50, "y": 0.45, "z": 0.0},
+        "elbow":     {"x": 0.55, "y": 0.65, "z": 0.0},
+        "wrist":     {"x": 0.60, "y": 0.80, "z": 0.0},
+        "index_mcp": {"x": 0.66, "y": 0.82, "z": 0.0},
+        "pinky_mcp": {"x": 0.64, "y": 0.85, "z": 0.0}
+      }
+    },
+    {
+      "id": "S03_relaxed_mouse",
+      "label": "Safe",
+      "notes": "Relaxed mouse-hand position, hand straight from forearm.",
+      "landmarks": {
+        "ear":       {"x": 0.50, "y": 0.22, "z": 0.0},
+        "shoulder":  {"x": 0.50, "y": 0.48, "z": 0.0},
+        "elbow":     {"x": 0.58, "y": 0.66, "z": 0.0},
+        "wrist":     {"x": 0.66, "y": 0.80, "z": 0.0},
+        "index_mcp": {"x": 0.74, "y": 0.83, "z": 0.0},
+        "pinky_mcp": {"x": 0.71, "y": 0.86, "z": 0.0}
+      }
+    },
+    {
+      "id": "S04_severe_forward_head",
+      "label": "High Strain",
+      "notes": "Pronounced forward-head posture (~35 deg from vertical).",
+      "landmarks": {
+        "ear":       {"x": 0.68, "y": 0.22, "z": 0.0},
+        "shoulder":  {"x": 0.50, "y": 0.48, "z": 0.0},
+        "elbow":     {"x": 0.55, "y": 0.66, "z": 0.0},
+        "wrist":     {"x": 0.60, "y": 0.80, "z": 0.0},
+        "index_mcp": {"x": 0.66, "y": 0.83, "z": 0.0},
+        "pinky_mcp": {"x": 0.64, "y": 0.86, "z": 0.0}
+      }
+    },
+    {
+      "id": "S05_severe_ulnar_deviation",
+      "label": "High Strain",
+      "notes": "Wrist bent sharply outward toward pinky relative to forearm.",
+      "landmarks": {
+        "ear":       {"x": 0.50, "y": 0.20, "z": 0.0},
+        "shoulder":  {"x": 0.50, "y": 0.45, "z": 0.0},
+        "elbow":     {"x": 0.55, "y": 0.65, "z": 0.0},
+        "wrist":     {"x": 0.60, "y": 0.80, "z": 0.0},
+        "index_mcp": {"x": 0.78, "y": 0.78, "z": 0.0},
+        "pinky_mcp": {"x": 0.82, "y": 0.84, "z": 0.0}
+      }
+    },
+    {
+      "id": "S06_radial_deviation",
+      "label": "High Strain",
+      "notes": "Wrist bent inward (radial deviation) — also injurious.",
+      "landmarks": {
+        "ear":       {"x": 0.50, "y": 0.20, "z": 0.0},
+        "shoulder":  {"x": 0.50, "y": 0.45, "z": 0.0},
+        "elbow":     {"x": 0.55, "y": 0.65, "z": 0.0},
+        "wrist":     {"x": 0.60, "y": 0.80, "z": 0.0},
+        "index_mcp": {"x": 0.55, "y": 0.74, "z": 0.0},
+        "pinky_mcp": {"x": 0.50, "y": 0.78, "z": 0.0}
+      }
+    },
+    {
+      "id": "S07_combined_strain",
+      "label": "High Strain",
+      "notes": "Forward head AND ulnar wrist deviation — compound risk.",
+      "landmarks": {
+        "ear":       {"x": 0.66, "y": 0.22, "z": 0.0},
+        "shoulder":  {"x": 0.50, "y": 0.48, "z": 0.0},
+        "elbow":     {"x": 0.55, "y": 0.66, "z": 0.0},
+        "wrist":     {"x": 0.60, "y": 0.80, "z": 0.0},
+        "index_mcp": {"x": 0.78, "y": 0.78, "z": 0.0},
+        "pinky_mcp": {"x": 0.82, "y": 0.84, "z": 0.0}
+      }
+    },
+    {
+      "id": "S08_borderline_forward_head",
+      "label": "Safe",
+      "notes": "Borderline ~18 deg forward head — should still pass as Safe.",
+      "landmarks": {
+        "ear":       {"x": 0.57, "y": 0.22, "z": 0.0},
+        "shoulder":  {"x": 0.50, "y": 0.48, "z": 0.0},
+        "elbow":     {"x": 0.55, "y": 0.66, "z": 0.0},
+        "wrist":     {"x": 0.60, "y": 0.80, "z": 0.0},
+        "index_mcp": {"x": 0.66, "y": 0.83, "z": 0.0},
+        "pinky_mcp": {"x": 0.64, "y": 0.86, "z": 0.0}
+      }
+    },
+    {
+      "id": "S09_extreme_forward_head_no_wrist",
+      "label": "High Strain",
+      "notes": "Severe forward head (~45 deg) with neutral wrist.",
+      "landmarks": {
+        "ear":       {"x": 0.78, "y": 0.25, "z": 0.0},
+        "shoulder":  {"x": 0.50, "y": 0.50, "z": 0.0},
+        "elbow":     {"x": 0.55, "y": 0.66, "z": 0.0},
+        "wrist":     {"x": 0.60, "y": 0.80, "z": 0.0},
+        "index_mcp": {"x": 0.66, "y": 0.83, "z": 0.0},
+        "pinky_mcp": {"x": 0.64, "y": 0.86, "z": 0.0}
+      }
+    },
+    {
+      "id": "S10_perfect_ergonomic",
+      "label": "Safe",
+      "notes": "Textbook posture: ear over shoulder, wrist straight.",
+      "landmarks": {
+        "ear":       {"x": 0.50, "y": 0.18, "z": 0.0},
+        "shoulder":  {"x": 0.50, "y": 0.46, "z": 0.0},
+        "elbow":     {"x": 0.54, "y": 0.66, "z": 0.0},
+        "wrist":     {"x": 0.58, "y": 0.82, "z": 0.0},
+        "index_mcp": {"x": 0.62, "y": 0.85, "z": 0.0},
+        "pinky_mcp": {"x": 0.60, "y": 0.88, "z": 0.0}
+      }
+    }
+  ]
+}
