@@ -20,8 +20,20 @@ panels and the v1 → v2 contrast.
 from __future__ import annotations
 
 import json
+import os
+import time
 from pathlib import Path
 from typing import Any, List, Mapping, Tuple
+
+# Optional inter-section pause for screen recordings. Set RSI_DEMO_PAUSE to a
+# number of seconds (e.g. 1.5) when recording with Asciinema so viewers have
+# time to read each panel. Defaults to 0 so live runs are unaffected.
+_PAUSE_SECONDS: float = float(os.environ.get("RSI_DEMO_PAUSE", "0"))
+
+
+def _pause() -> None:
+    if _PAUSE_SECONDS > 0:
+        time.sleep(_PAUSE_SECONDS)
 
 from rich.console import Console
 from rich.panel import Panel
@@ -114,6 +126,7 @@ def main() -> int:
             expand=False,
         )
     )
+    _pause()
 
     # -----------------------------------------------------------------------
     # Cycle 1 — v1 (intentionally flawed)
@@ -125,6 +138,7 @@ def main() -> int:
     v1_results = _to_results(scenarios, assess_v1=True)
     v1_metrics = Metrics.from_results(v1_results)
     _render_log(console, v1_results, v1_metrics)
+    _pause()
 
     # -----------------------------------------------------------------------
     # Self-correction narrative
@@ -151,6 +165,7 @@ def main() -> int:
             expand=False,
         )
     )
+    _pause()
 
     # -----------------------------------------------------------------------
     # Cycle 2 — v2 (current detector.py)
@@ -164,6 +179,7 @@ def main() -> int:
     v2_results = _to_results(scenarios, assess_v1=False)
     v2_metrics = Metrics.from_results(v2_results)
     _render_log(console, v2_results, v2_metrics)
+    _pause()
 
     # -----------------------------------------------------------------------
     # Stage 2 — regulatory audit
@@ -175,6 +191,7 @@ def main() -> int:
     )
     audit_report = auditor.run_audit()
     auditor.render_report(audit_report, console=console)
+    _pause()
 
     # -----------------------------------------------------------------------
     # Final status

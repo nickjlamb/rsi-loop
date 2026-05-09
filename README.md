@@ -6,6 +6,14 @@
 
 ---
 
+## Demo
+
+![The RSI Loop in action — v1 fails on a radial-deviation case, the loop self-corrects to v2, the regulatory Auditor signs off, and the final status is COMPLETE.](demo.gif)
+
+The recording above is the full output of [`demo.py`](demo.py): cycle 1 (flawed v1 detector → 90% accuracy), the self-improvement analysis, cycle 2 (corrected v2 → 100%), and the Stage 2 regulatory audit. A higher-fidelity version is also committed as [`demo.cast`](demo.cast) — play it locally with `asciinema play demo.cast` or upload it with `asciinema upload demo.cast`.
+
+---
+
 ## Quick start
 
 ```bash
