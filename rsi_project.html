@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The RSI Loop — A Validated Recursive Self-Improvement System | PharmaTools.AI</title>
+<meta name="description" content="A closed-loop agentic framework that evolves its own ergonomic detection logic, supervised by a clinical-compliance auditor that prevents reward hacking. Built by Nick Lamb.">
+
+<!-- Open Graph / social sharing -->
+<meta property="og:type" content="article">
+<meta property="og:title" content="The RSI Loop — Using RSI to solve RSI">
+<meta property="og:description" content="A validated Recursive Self-Improvement system that evolves its own ergonomic-detection logic, gated by a clinical compliance auditor.">
+<meta property="og:image" content="og.png">
+<meta property="og:url" content="https://pharmatools.ai/rsi-loop">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;1,6..72,300;1,6..72,400&family=Inter:wght@300;400;500;600&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+--ink: #0f1a2e;
+--paper: #ffffff;
+--off-white: #f7f8fa;
+--teal: #0d7377;
+--teal-light: #e6f3f3;
+--muted: #6b7b8d;
+--rule: #e2e5ea;
+--amber: #b45309;
+--green: #2d7a4f;
+--red: #b4332b;
+--slate: #5b7a9d;
+--grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 17px; scroll-behavior: smooth; }
+
+body {
+font-family: 'Inter', sans-serif;
+background: var(--paper);
+color: var(--ink);
+line-height: 1.6;
+-webkit-font-smoothing: antialiased;
+}
+
+.page-width {
+max-width: 1100px;
+margin: 0 auto;
+padding: 0 2rem;
+}
+
+a { color: inherit; }
+
+/* === BACK NAV === */
+.subnav {
+border-bottom: 1px solid var(--rule);
+padding: 1rem 0;
+font-size: 0.78rem;
+}
+.subnav a {
+color: var(--muted);
+text-decoration: none;
+display: inline-flex;
+align-items: center;
+gap: 0.4rem;
+transition: color 0.2s;
+}
+.subnav a:hover { color: var(--teal); }
+
+/* === HERO === */
+.proj-hero {
+padding: 4rem 0 2.5rem;
+border-bottom: 1px solid var(--rule);
+background: var(--paper);
+position: relative;
+overflow: hidden;
+}
+.proj-kicker {
+display: inline-block;
+font-size: 0.65rem;
+font-weight: 500;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(--teal);
+background: var(--teal-light);
+padding: 0.35rem 0.75rem;
+border-radius: 999px;
+margin-bottom: 1.5rem;
+}
+.proj-hero h1 {
+font-family: 'Newsreader', serif;
+font-size: clamp(2.2rem, 4.6vw, 3.4rem);
+line-height: 1.05;
+font-weight: 300;
+letter-spacing: -0.025em;
+max-width: 22ch;
+margin-bottom: 1rem;
+color: var(--ink);
+}
+.proj-hero h1 strong {
+font-weight: 400;
+color: var(--teal);
+}
+.proj-subtitle {
+font-family: 'Newsreader', serif;
+font-style: italic;
+font-size: 1.2rem;
+font-weight: 300;
+color: var(--muted);
+max-width: 50ch;
+margin-bottom: 2rem;
+line-height: 1.5;
+}
+
+.proj-meta {
+display: flex;
+flex-wrap: wrap;
+gap: 1.5rem;
+margin-bottom: 2.5rem;
+font-size: 0.78rem;
+color: var(--muted);
+}
+.proj-meta-item {
+display: inline-flex;
+align-items: baseline;
+gap: 0.4rem;
+}
+.proj-meta-item strong {
+color: var(--ink);
+font-weight: 500;
+font-family: 'Fira Code', monospace;
+font-size: 0.75rem;
+}
+
+.proj-ctas {
+display: flex;
+flex-wrap: wrap;
+gap: 1rem;
+align-items: center;
+}
+.btn-primary {
+display: inline-flex;
+align-items: center;
+gap: 0.55rem;
+font-size: 0.82rem;
+font-weight: 500;
+letter-spacing: 0.02em;
+color: var(--paper);
+background: var(--teal);
+text-decoration: none;
+padding: 0.85rem 1.5rem;
+border-radius: 4px;
+transition: background 0.25s, transform 0.2s;
+}
+.btn-primary:hover { background: #0a5c5f; transform: translateY(-1px); }
+.btn-secondary {
+display: inline-flex;
+align-items: center;
+gap: 0.55rem;
+font-size: 0.82rem;
+font-weight: 500;
+color: var(--ink);
+background: transparent;
+text-decoration: none;
+padding: 0.85rem 1.5rem;
+border: 1px solid var(--rule);
+border-radius: 4px;
+transition: all 0.25s;
+}
+.btn-secondary:hover { border-color: var(--teal); color: var(--teal); }
+
+/* === SECTION LABELS === */
+.section-num {
+font-family: 'Fira Code', monospace;
+font-size: 0.7rem;
+color: var(--teal);
+margin-right: 0.5rem;
+}
+.section-label {
+font-size: 0.7rem;
+font-weight: 600;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(--teal);
+padding-top: 4rem;
+margin-bottom: 0.5rem;
+}
+.section-heading {
+font-family: 'Newsreader', serif;
+font-size: 2rem;
+font-weight: 300;
+margin-bottom: 1.5rem;
+padding-bottom: 1rem;
+border-bottom: 1px solid var(--rule);
+letter-spacing: -0.015em;
+}
+section { padding-bottom: 2rem; }
+.section-body p {
+font-size: 1rem;
+line-height: 1.75;
+color: var(--ink);
+margin-bottom: 1rem;
+max-width: 68ch;
+}
+.section-body p.lead {
+font-family: 'Newsreader', serif;
+font-size: 1.2rem;
+font-weight: 300;
+font-style: italic;
+color: var(--muted);
+max-width: 60ch;
+margin-bottom: 1.5rem;
+}
+
+/* === DEMO GIF === */
+.demo-frame {
+margin: 1.5rem 0 0.5rem;
+border: 1px solid var(--rule);
+border-radius: 6px;
+overflow: hidden;
+background: var(--ink);
+position: relative;
+}
+.demo-frame img {
+display: block;
+width: 100%;
+height: auto;
+}
+.demo-caption {
+font-size: 0.8rem;
+color: var(--muted);
+font-style: italic;
+margin-top: 0.6rem;
+font-family: 'Newsreader', serif;
+}
+
+/* === ARCHITECTURE / PIPELINE === */
+.pipeline {
+display: grid;
+gap: 1.5rem;
+margin: 1rem 0 0.5rem;
+}
+.stage {
+border: 1px solid var(--rule);
+border-radius: 6px;
+padding: 1.6rem 1.8rem;
+background: var(--paper);
+position: relative;
+}
+.stage.stage-accuracy { border-left: 3px solid var(--slate); }
+.stage.stage-compliance { border-left: 3px solid var(--teal); }
+.stage-tag {
+display: inline-flex;
+align-items: center;
+gap: 0.5rem;
+font-family: 'Fira Code', monospace;
+font-size: 0.65rem;
+font-weight: 500;
+letter-spacing: 0.18em;
+text-transform: uppercase;
+color: var(--muted);
+margin-bottom: 0.6rem;
+}
+.stage-tag::before {
+content: '';
+width: 8px;
+height: 8px;
+border-radius: 50%;
+background: var(--slate);
+display: inline-block;
+}
+.stage.stage-compliance .stage-tag::before { background: var(--teal); }
+.stage h3 {
+font-family: 'Newsreader', serif;
+font-size: 1.4rem;
+font-weight: 300;
+letter-spacing: -0.01em;
+margin-bottom: 0.4rem;
+}
+.stage-lede {
+font-size: 0.92rem;
+line-height: 1.65;
+color: var(--muted);
+margin-bottom: 1.1rem;
+max-width: 60ch;
+}
+.stage-grid {
+display: grid;
+grid-template-columns: 80px 1fr;
+gap: 0.4rem 1.2rem;
+font-size: 0.85rem;
+align-items: baseline;
+}
+.stage-grid dt {
+font-family: 'Fira Code', monospace;
+font-size: 0.7rem;
+color: var(--teal);
+text-transform: uppercase;
+letter-spacing: 0.12em;
+padding-top: 0.1rem;
+}
+.stage-grid dd {
+color: var(--ink);
+}
+.stage-grid dd code {
+font-family: 'Fira Code', monospace;
+font-size: 0.78rem;
+background: var(--off-white);
+padding: 0.1rem 0.35rem;
+border-radius: 2px;
+color: var(--ink);
+}
+.stage-gate {
+margin-top: 1.1rem;
+padding-top: 1rem;
+border-top: 1px dashed var(--rule);
+font-size: 0.82rem;
+color: var(--muted);
+display: flex;
+flex-wrap: wrap;
+gap: 0.5rem 1.25rem;
+align-items: baseline;
+}
+.stage-gate strong {
+font-family: 'Fira Code', monospace;
+font-size: 0.72rem;
+text-transform: uppercase;
+letter-spacing: 0.12em;
+color: var(--ink);
+font-weight: 500;
+}
+.stage-gate .pass { color: var(--green); font-family: 'Fira Code', monospace; font-size: 0.78rem; }
+.stage-gate .fail { color: var(--red); font-family: 'Fira Code', monospace; font-size: 0.78rem; }
+
+.pipeline-arrow {
+text-align: center;
+font-family: 'Newsreader', serif;
+color: var(--rule);
+font-size: 1.6rem;
+line-height: 1;
+margin: -0.4rem 0;
+}
+
+.final-status {
+border: 1px solid var(--green);
+background: rgba(45,122,79,0.05);
+padding: 1.1rem 1.5rem;
+border-radius: 6px;
+text-align: center;
+font-family: 'Fira Code', monospace;
+font-size: 0.85rem;
+color: var(--green);
+letter-spacing: 0.05em;
+margin-top: 0.5rem;
+}
+.final-status strong { font-weight: 500; }
+
+/* === TERMINAL EVOLUTION LOG === */
+.terminal {
+background: var(--ink);
+color: #d8dee9;
+border-radius: 6px;
+overflow: hidden;
+margin: 1rem 0;
+font-family: 'Fira Code', monospace;
+font-size: 0.78rem;
+line-height: 1.7;
+border: 1px solid #1d2742;
+}
+.terminal-bar {
+background: #0a1326;
+padding: 0.55rem 1rem;
+display: flex;
+align-items: center;
+gap: 0.4rem;
+border-bottom: 1px solid #1d2742;
+font-size: 0.7rem;
+color: rgba(255,255,255,0.4);
+letter-spacing: 0.05em;
+}
+.term-dot { width: 11px; height: 11px; border-radius: 50%; }
+.term-dot.r { background: #ff5f57; }
+.term-dot.y { background: #ffbd2e; }
+.term-dot.g { background: #28c840; }
+.terminal-bar-title {
+margin-left: 0.7rem;
+font-family: 'Fira Code', monospace;
+}
+.terminal-body {
+padding: 1.2rem 1.5rem;
+white-space: pre;
+overflow-x: auto;
+}
+.term-prompt { color: var(--teal); }
+.term-rule { color: rgba(255,255,255,0.18); }
+.term-cycle { color: #ffbd2e; }
+.term-pass { color: #5fcf80; font-weight: 500; }
+.term-fail { color: #ff7066; font-weight: 500; }
+.term-key { color: #82aaff; }
+.term-em { color: #ffffff; font-weight: 500; }
+.term-dim { color: rgba(255,255,255,0.5); }
+.term-complete { color: #5fcf80; font-weight: 500; }
+
+/* === GxP TABLE === */
+.gxp-table {
+margin: 1rem 0;
+border-collapse: collapse;
+width: 100%;
+font-size: 0.88rem;
+}
+.gxp-table thead th {
+text-align: left;
+font-family: 'Fira Code', monospace;
+font-size: 0.7rem;
+text-transform: uppercase;
+letter-spacing: 0.12em;
+color: var(--teal);
+padding: 0.7rem 0.9rem;
+border-bottom: 1px solid var(--rule);
+}
+.gxp-table tbody td {
+padding: 0.85rem 0.9rem;
+border-bottom: 1px solid var(--rule);
+vertical-align: top;
+line-height: 1.6;
+}
+.gxp-table tbody tr:last-child td { border-bottom: none; }
+.gxp-table tbody td:first-child {
+font-weight: 500;
+color: var(--ink);
+white-space: nowrap;
+}
+.gxp-table tbody td:nth-child(2) {
+color: var(--muted);
+}
+.gxp-table tbody td code {
+font-family: 'Fira Code', monospace;
+font-size: 0.78rem;
+background: var(--off-white);
+padding: 0.1rem 0.4rem;
+border-radius: 2px;
+color: var(--ink);
+}
+
+/* === LIMITATIONS / NEXT === */
+.next-grid {
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 1rem;
+margin-top: 1rem;
+}
+.next-card {
+background: var(--off-white);
+padding: 1.5rem;
+border-radius: 6px;
+border-left: 3px solid var(--teal);
+}
+.next-card h4 {
+font-size: 0.7rem;
+font-weight: 600;
+letter-spacing: 0.18em;
+text-transform: uppercase;
+color: var(--teal);
+margin-bottom: 0.6rem;
+}
+.next-card p {
+font-size: 0.92rem;
+line-height: 1.65;
+color: var(--ink);
+margin: 0;
+}
+
+/* === FINAL CTA === */
+.final-cta {
+background: var(--ink);
+padding: 4rem 0;
+text-align: center;
+margin-top: 4rem;
+position: relative;
+overflow: hidden;
+}
+.final-cta::before {
+content: '';
+position: absolute;
+inset: 0;
+background-image:
+radial-gradient(circle at 20% 50%, rgba(13,115,119,0.18) 0%, transparent 50%),
+radial-gradient(circle at 80% 50%, rgba(13,115,119,0.10) 0%, transparent 50%);
+pointer-events: none;
+}
+.final-cta-inner { position: relative; z-index: 1; }
+.final-cta h2 {
+font-family: 'Newsreader', serif;
+font-size: clamp(1.7rem, 3vw, 2.2rem);
+font-weight: 300;
+color: var(--paper);
+margin-bottom: 1rem;
+}
+.final-cta p {
+font-size: 0.95rem;
+color: rgba(255,255,255,0.65);
+max-width: 50ch;
+margin: 0 auto 2rem;
+line-height: 1.7;
+}
+.final-cta .btn-primary { background: var(--teal); }
+.final-cta .btn-secondary {
+color: rgba(255,255,255,0.8);
+border-color: rgba(255,255,255,0.25);
+}
+.final-cta .btn-secondary:hover {
+background: rgba(255,255,255,0.05);
+color: var(--paper);
+border-color: var(--paper);
+}
+
+/* === FOOTER === */
+.proj-footer {
+border-top: 1px solid var(--rule);
+padding: 2rem 0 3rem;
+background: var(--paper);
+font-size: 0.78rem;
+color: var(--muted);
+}
+.proj-footer a { color: var(--teal); text-decoration: none; }
+.proj-footer a:hover { text-decoration: underline; }
+
+/* === REVEAL === */
+.reveal {
+opacity: 0;
+transform: translateY(0.75rem);
+transition: opacity 0.5s cubic-bezier(0.22,1,0.36,1), transform 0.5s cubic-bezier(0.22,1,0.36,1);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* === RESPONSIVE === */
+@media (max-width: 1024px) {
+.page-width { padding: 0 1.5rem; }
+.proj-hero { padding: 3rem 0 2rem; }
+.next-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+.proj-hero h1 { font-size: 2rem; }
+.proj-subtitle { font-size: 1.05rem; }
+.proj-ctas { flex-direction: column; align-items: stretch; gap: 0.6rem; }
+.btn-primary, .btn-secondary { justify-content: center; }
+.stage { padding: 1.3rem; }
+.stage-grid { grid-template-columns: 1fr; gap: 0.15rem; }
+.stage-grid dt { padding-top: 0.6rem; }
+.terminal-body { font-size: 0.7rem; padding: 1rem; }
+.gxp-table { font-size: 0.82rem; }
+.gxp-table thead { display: none; }
+.gxp-table tbody, .gxp-table tr, .gxp-table td { display: block; width: 100%; }
+.gxp-table tbody td { padding: 0.4rem 0; border: none; }
+.gxp-table tbody tr {
+border-bottom: 1px solid var(--rule);
+padding: 0.85rem 0;
+}
+.gxp-table tbody td:first-child {
+color: var(--teal);
+font-family: 'Fira Code', monospace;
+font-size: 0.7rem;
+text-transform: uppercase;
+letter-spacing: 0.12em;
+margin-bottom: 0.2rem;
+}
+}
+@media (max-width: 480px) {
+html { font-size: 15px; }
+.page-width { padding: 0 1.25rem; }
+.section-heading { font-size: 1.6rem; }
+.section-label { padding-top: 2.5rem; }
+.terminal-body { font-size: 0.65rem; padding: 0.8rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- BACK NAV -->
+<nav class="subnav">
+<div class="page-width">
+<a href="/"><span aria-hidden="true">←</span> PharmaTools.AI</a>
+</div>
+</nav>
+
+<!-- HERO -->
+<header class="proj-hero">
+<div class="page-width">
+<span class="proj-kicker">Lab · Experiment</span>
+<h1>The RSI Loop: A Validated <strong>Recursive Self-Improvement</strong> System</h1>
+<p class="proj-subtitle">Using RSI to solve RSI: a closed-loop agentic framework for ergonomic safety.</p>
+
+<div class="proj-meta">
+<span class="proj-meta-item">Stack <strong>Python · MediaPipe · rich</strong></span>
+<span class="proj-meta-item">Lines <strong>~1,150</strong></span>
+<span class="proj-meta-item">Status <strong>v2 — COMPLETE</strong></span>
+<span class="proj-meta-item">Author <strong>Nick Lamb</strong></span>
+</div>
+
+<div class="proj-ctas">
+<a class="btn-primary" href="https://github.com/nickjlamb/rsi-loop">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.69-.01-1.36-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.81.06 1.23.83 1.23.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.03 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38C13.71 14.53 16 11.54 16 8c0-4.42-3.58-8-8-8z"/></svg>
+View Source on GitHub
+<span aria-hidden="true">→</span>
+</a>
+<a class="btn-secondary" href="#demo">
+<span aria-hidden="true">▸</span>
+Watch the Narrated Demo
+</a>
+</div>
+</div>
+</header>
+
+<!-- DEMO GIF — placed near hero for narrative weight -->
+<section id="demo">
+<div class="page-width">
+<p class="section-label"><span class="section-num">00</span>Demo</p>
+<h2 class="section-heading">The whole loop in 30 seconds</h2>
+<div class="section-body">
+<div class="demo-frame reveal">
+<img src="demo.gif" alt="Terminal recording: Cycle 1 (v1 detector) fails on radial wrist deviation at 90% accuracy, the system analyses the geometric flaw and proposes vector trigonometry, Cycle 2 (v2) reaches 100%, the regulatory Auditor confirms thresholds are inside the Clinical Gold Standard, and the final RSI Loop status is COMPLETE." loading="lazy">
+</div>
+<p class="demo-caption">Recording of <code>python3 demo.py</code>. Real-time, no editing — Cycle 1 (flawed) → analysis → Cycle 2 (corrected) → regulatory audit → COMPLETE.</p>
+</div>
+</div>
+</section>
+
+<!-- 01 — THE PROBLEM -->
+<section>
+<div class="page-width">
+<p class="section-label"><span class="section-num">01</span>The Problem</p>
+<h2 class="section-heading">A meta-irony in three letters</h2>
+<div class="section-body reveal">
+<p class="lead">The same three letters describe both the hardest open problem in AI safety and the most common occupational injury among the people building it.</p>
+<p>RSI in machine-learning circles is <em>Recursive Self-Improvement</em> — a system that edits its own logic to get better at its objective. RSI in physiotherapy is <em>Repetitive Strain Injury</em> — what happens to your forearms after a few thousand keystrokes a week. The first one is a frontier-lab anxiety; the second is what you actually wake up with on a Wednesday after shipping a frontier-lab feature on a Tuesday.</p>
+<p>This project leans into the joke. It is a Recursive-Self-Improvement system whose job is to detect Repetitive-Strain-Injury risk. The loop edits its own ergonomic detector against a benchmark suite — and the only thing standing between the loop and a perfectly self-satisfied 999° wrist threshold is a regulatory auditor that asks, in effect, "Would a clinician actually sign off on this?"</p>
+</div>
+</div>
+</section>
+
+<!-- 02 — ARCHITECTURE -->
+<section>
+<div class="page-width">
+<p class="section-label"><span class="section-num">02</span>Architecture</p>
+<h2 class="section-heading">A two-stage validation pipeline</h2>
+<div class="section-body">
+<p>Self-improving systems fail when their objective is too easy to satisfy. The RSI Loop separates "did it work?" (Stage&nbsp;1) from "is the result clinically meaningful?" (Stage&nbsp;2). The optimiser is free to mutate thresholds; only iterations that pass <em>both</em> stages are accepted as <code>COMPLETE</code>.</p>
+<p style="font-size: 0.85rem; color: var(--muted); font-style: italic; padding: 0.6rem 0.9rem; border-left: 2px solid var(--rule); max-width: 60ch; margin-bottom: 1.5rem;">Read top to bottom — each stage produces a verdict and an exit code, and the loop is <code style="font-style: normal;">COMPLETE</code> only if both verdicts are <code style="font-style: normal;">PASS</code>.</p>
+
+<div class="pipeline reveal">
+
+<div class="stage stage-accuracy">
+<span class="stage-tag">Stage 01 · Accuracy</span>
+<h3>Does the detector classify posture correctly?</h3>
+<p class="stage-lede">The optimiser tunes <code>detector.py</code> against <code>benchmarks.json</code> until it correctly labels every ground-truth scenario — including the v1 radial-deviation blind spot that v2 fixes with vector trigonometry.</p>
+<dl class="stage-grid">
+<dt>Inputs</dt>      <dd>10 labelled scenarios (Safe / High Strain) from <code>benchmarks.json</code></dd>
+<dt>Process</dt>     <dd><code>detector.assess(landmarks)</code> over each scenario</dd>
+<dt>Metrics</dt>     <dd>accuracy · precision · recall · F1</dd>
+</dl>
+<div class="stage-gate">
+<strong>Gate</strong>
+<span>accuracy ≥ 90 %</span>
+<span class="pass">if PASS → Stage 2</span>
+<span class="fail">if FAIL → exit 1 (NOT_ACCURATE)</span>
+</div>
+</div>
+
+<div class="pipeline-arrow" aria-hidden="true">▼</div>
+
+<div class="stage stage-compliance">
+<span class="stage-tag">Stage 02 · Compliance</span>
+<h3>Are the AI-tuned thresholds clinically plausible?</h3>
+<p class="stage-lede">The Auditor reads the live thresholds out of <code>detector.py</code> via <code>getattr</code> and compares each one against the <em>Clinical Gold Standard</em>. A loop that hacks thresholds into impossible values gets caught here, even if Stage 1 was satisfied.</p>
+<dl class="stage-grid">
+<dt>Standard</dt>    <dd>Forward-head <code>15–25°</code> · Wrist deviation <code>40–60°</code></dd>
+<dt>Tolerance</dt>   <dd>±5° warning band; beyond → hard failure</dd>
+<dt>Verdicts</dt>    <dd><code>PASS</code> · <code>WARNING</code> · <code>HARD FAILURE</code> per threshold</dd>
+</dl>
+<div class="stage-gate">
+<strong>Gate</strong>
+<span>every finding = PASS</span>
+<span class="pass">if PASS → COMPLETE</span>
+<span class="fail">if FAIL → exit 2 (NOT_COMPLIANT)</span>
+</div>
+</div>
+
+<div class="pipeline-arrow" aria-hidden="true">▼</div>
+
+<div class="final-status"><strong>RSI LOOP STATUS: COMPLETE</strong> &nbsp;·&nbsp; accurate AND compliant</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<!-- 03 — EVOLUTION LOG -->
+<section>
+<div class="page-width">
+<p class="section-label"><span class="section-num">03</span>Evolution Log</p>
+<h2 class="section-heading">Cycle 1 → Cycle 2, captured live</h2>
+<div class="section-body">
+<p>Cycle 1's detector used a signed horizontal offset (<code>hand_x − wrist_x &gt; 0.10</code>) — direction-blind, so it caught ulnar deviation but silently missed radial deviation on scenario&nbsp;S06. Cycle 2 replaced both heuristics with proper trigonometric angles between the forearm and metacarpal vectors, and the loop converged.</p>
+
+<div class="terminal reveal" role="img" aria-label="Terminal output of demo.py showing the v1 to v2 self-improvement cycle.">
+<div class="terminal-bar">
+<span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+<span class="terminal-bar-title">demo.py — RSI Loop Self-Improvement</span>
+</div>
+<div class="terminal-body"><span class="term-prompt">$</span> python3 demo.py
+<span class="term-rule">────────────────────────────────────────────────────────────────</span>
+<span class="term-cycle">CYCLE 1 — v1 detector (intentionally flawed)</span>
+
+  S05_severe_ulnar_deviation     <span class="term-pass">PASS</span>
+  <span class="term-em">S06_radial_deviation           <span class="term-fail">FAIL</span>  expected=High Strain  predicted=Safe</span>
+  S07_combined_strain            <span class="term-pass">PASS</span>
+
+  Accuracy <span class="term-fail">90%</span>   Precision 100%   Recall <span class="term-fail">80%</span>   F1 0.89
+<span class="term-rule">────────────────────────────────────────────────────────────────</span>
+<span class="term-cycle">SELF-IMPROVEMENT — Analysis &amp; Proposed Fix</span>
+
+  <span class="term-key">Failure</span>:  v1's signed offset (<span class="term-em">hand_x − wrist_x</span>) only fires
+            when displacement is positive. Radial deviation
+            produces a negative offset and is silently ignored.
+
+  <span class="term-key">Fix</span>:      Replace both heuristics with proper trigonometric
+            angles. Forward-head: <span class="term-em">atan2(|dx|, |dy|)</span>. Wrist:
+            angle between forearm vector (elbow→wrist) and
+            metacarpal vector (wrist→hand_center). Both are
+            direction-agnostic — radial AND ulnar are caught.
+
+  <span class="term-key">New thresholds</span>: <span class="term-em">20°</span> head · <span class="term-em">50°</span> wrist
+<span class="term-rule">────────────────────────────────────────────────────────────────</span>
+<span class="term-cycle">CYCLE 2 — v2 detector (corrected)</span>
+
+  S05_severe_ulnar_deviation     <span class="term-pass">PASS</span>   wrist=68.7°
+  S06_radial_deviation           <span class="term-pass">PASS</span>   wrist=136.5°
+  S07_combined_strain            <span class="term-pass">PASS</span>   wrist=67.5°
+
+  Accuracy <span class="term-pass">100%</span>  Precision 100%   Recall <span class="term-pass">100%</span>  F1 1.00
+<span class="term-rule">────────────────────────────────────────────────────────────────</span>
+<span class="term-cycle">STAGE 2 — Regulatory Audit</span>
+
+  Forward Head Threshold     20.00°  ∈ [15.0, 25.0]   <span class="term-pass">PASS</span>
+  Wrist Deviation Threshold  50.00°  ∈ [40.0, 60.0]   <span class="term-pass">PASS</span>
+
+  Overall Compliance: <span class="term-pass">PASS</span>
+<span class="term-rule">────────────────────────────────────────────────────────────────</span>
+<span class="term-em">RSI LOOP STATUS:</span> <span class="term-complete">COMPLETE</span>  <span class="term-dim">— accurate AND compliant</span></div>
+</div>
+
+<p style="margin-top: 1.2rem;">The same code path also catches a subtler, more dangerous attack: drift the wrist threshold to <code>67°</code> and Stage 1 still passes 100%, but Stage 2 returns <code>HARD FAILURE</code> (7° beyond the clinical max), the loop is rejected, and the iteration is discarded.</p>
+</div>
+</div>
+</section>
+
+<!-- 04 — PHARMA ANGLE -->
+<section>
+<div class="page-width">
+<p class="section-label"><span class="section-num">04</span>The Pharma Angle</p>
+<h2 class="section-heading">GxP-Ready Agentic Design</h2>
+<div class="section-body">
+<p>Pharma teams already have a name for "let the system improve, but only inside an immutable spec": <strong>Computer System Validation (CSV)</strong>. The RSI Loop's two-stage pipeline maps cleanly onto CSV's separation between <em>functional</em> qualification (does the system do what it claims?) and <em>performance</em> qualification (does it stay inside its validated envelope under change?).</p>
+
+<table class="gxp-table reveal">
+<thead>
+<tr>
+<th>CSV Concept</th>
+<th>RSI Loop Equivalent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Validated specification</td>
+<td>Clinical Gold Standard, hard-coded in <code>auditor.py</code> — the search space the loop is allowed to occupy</td>
+</tr>
+<tr>
+<td>Operational Qualification (OQ)</td>
+<td>Stage&nbsp;1 — <code>test_engine.py</code> proves the detector classifies the labelled benchmarks correctly</td>
+</tr>
+<tr>
+<td>Performance Qualification (PQ)</td>
+<td>Stage&nbsp;2 — the Auditor proves AI-tuned thresholds stay within clinically acceptable bounds</td>
+</tr>
+<tr>
+<td>Change control</td>
+<td>Any threshold mutation forces a fresh audit; failed audits return non-zero exit codes that block the change</td>
+</tr>
+<tr>
+<td>Independence of QA</td>
+<td>The Auditor is a separate module reading thresholds via <code>getattr(detector, …)</code> — the loop cannot self-certify</td>
+</tr>
+<tr>
+<td>Audit trail</td>
+<td><code>last_run.json</code> persists every cycle's metrics + audit verdict for diff against future iterations</td>
+</tr>
+</tbody>
+</table>
+
+<p>The takeaway for pharma audiences: <strong>self-improving AI does not have to be incompatible with regulated environments.</strong> What it needs is the same structure pharma already trusts — an external, immutable spec, with the optimiser bounded inside it. The RSI Loop is a 1,150-line proof of concept for that pattern, in a domain (ergonomics) that's friendly enough to host it without regulatory entanglement.</p>
+</div>
+</div>
+</section>
+
+<!-- 05 — LIMITATIONS / ROADMAP -->
+<section>
+<div class="page-width">
+<p class="section-label"><span class="section-num">05</span>Limitations &amp; Roadmap</p>
+<h2 class="section-heading">What this prototype is — and isn't</h2>
+<div class="section-body">
+<p>This is a deliberately small, deliberately observable prototype. The point is the <em>pattern</em>, not the model. Honest about what's still missing:</p>
+
+<div class="next-grid reveal">
+<div class="next-card">
+<h4>Today</h4>
+<p>Synthetic benchmark suite (10 hand-authored landmark sets). Two detection rules. Static Clinical Gold Standard hard-coded in the Auditor. Deterministic optimiser steps proposed by the developer.</p>
+</div>
+<div class="next-card">
+<h4>Next</h4>
+<p>Real webcam pilot with MediaPipe-streamed pose data. Larger benchmark suite drawn from labelled real footage. Additional rules (shoulder elevation, mouse-arm extension). Auditor sourced from a versioned ergonomic-literature dataset rather than constants in code.</p>
+</div>
+<div class="next-card">
+<h4>Later</h4>
+<p>Generalise the two-stage pattern to any agentic loop: replace Clinical Gold Standard with whatever immutable spec governs the target domain (ABPI for promotional copy, ICH-E6 for trial design, etc.). The RSI Loop becomes a template, not a product.</p>
+</div>
+<div class="next-card">
+<h4>Won't</h4>
+<p>This will not become a clinical device, a workplace surveillance tool, or a substitute for a real ergonomist. The intent is methodological — to demonstrate validated self-improvement in a small, portable form.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+<div class="page-width final-cta-inner">
+<h2>Read the code, watch the loop close.</h2>
+<p>Everything is in one repo: detector, auditor, benchmarks, narrated demo, and the recording you saw above. About 1,150 lines, MIT-licensed, runs on a laptop in under a second.</p>
+<div class="proj-ctas" style="justify-content: center;">
+<a class="btn-primary" href="https://github.com/nickjlamb/rsi-loop">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.69-.01-1.36-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.81.06 1.23.83 1.23.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.03 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38C13.71 14.53 16 11.54 16 8c0-4.42-3.58-8-8-8z"/></svg>
+View Source on GitHub
+</a>
+<a class="btn-secondary" href="#demo">
+<span aria-hidden="true">▸</span>
+Watch the Narrated Demo
+</a>
+</div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="proj-footer">
+<div class="page-width">
+Part of the <a href="/">PharmaTools.AI</a> Labs collection — experimental systems, not commercial products. Built by <a href="/">Nick Lamb</a>, 2026.
+</div>
+</footer>
+
+<script>
+// Scroll reveal — same pattern as the homepage
+(function() {
+const els = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver((entries) => {
+entries.forEach(e => {
+if (e.isIntersecting) {
+e.target.classList.add('visible');
+obs.unobserve(e.target);
+}
+});
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+els.forEach(el => obs.observe(el));
+})();
+</script>
+
+</body>
+</html>

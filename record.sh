@@ -56,6 +56,20 @@ else
     echo "        macOS:   brew install agg"
 fi
 
+# Static OG/social-card image — first frame of the GIF, since most social
+# unfurlers (Slack, LinkedIn, Twitter) won't animate GIFs in previews.
+OG="og.png"
+if [ -f "$GIF" ] && command -v ffmpeg >/dev/null 2>&1; then
+    echo
+    echo "==> Extracting first frame as $OG (for og:image)"
+    ffmpeg -y -loglevel error -i "$GIF" -vframes 1 "$OG"
+    echo "==> Wrote $OG ($(du -h "$OG" | cut -f1))"
+elif [ -f "$GIF" ]; then
+    echo
+    echo "==> Tip: install 'ffmpeg' to also produce $OG for social previews"
+    echo "        macOS:   brew install ffmpeg"
+fi
+
 echo
 echo "Next steps:"
 echo "  • Inspect locally:        asciinema play $CAST"
