@@ -1,5 +1,8 @@
 # The RSI Loop — A Validated Self-Improving Detector for Repetitive Strain Injury
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![Python](https://img.shields.io/badge/python-3.x-blue.svg)
+
 **The RSI Loop** is a self-improving (Recursive Self-Improvement) computer-vision pipeline that detects ergonomic risks for Repetitive Strain Injury in computer users. It estimates **forward-head posture** and **wrist ulnar/radial deviation** from MediaPipe pose and hand landmarks, improves its own detection logic against a benchmark suite, and is supervised by a regulatory Auditor that keeps the self-evolved thresholds inside published clinical norms.
 
 > Built for the [pharmatools.ai](https://pharmatools.ai) portfolio.
