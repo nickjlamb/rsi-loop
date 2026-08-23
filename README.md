@@ -38,32 +38,10 @@ The RSI Loop demonstrates a *Validated* form of self-improvement: a two-stage ga
 
 ## Two-Stage Validation
 
-```
-                    ┌──────────────────────────────────────┐
-                    │        STAGE 1 — ACCURACY            │
-                    │                                      │
-benchmarks.json ───▶│  detector.assess(landmarks) for each │
-                    │  labelled scenario in the suite.     │
-                    │                                      │
-                    │  Pass condition:                     │
-                    │      accuracy ≥ 90 %                 │
-                    └─────────────────┬────────────────────┘
-                                      │  (gate)
-                                      ▼
-                    ┌──────────────────────────────────────┐
-                    │        STAGE 2 — COMPLIANCE          │
-                    │                                      │
-detector thresholds │  Auditor compares each AI-tuned      │
-       ───────────▶ │  threshold to the Clinical Gold      │
-                    │  Standard.                           │
-                    │                                      │
-                    │  Pass condition:                     │
-                    │      every finding == "PASS"         │
-                    └─────────────────┬────────────────────┘
-                                      │
-                                      ▼
-                       RSI LOOP STATUS: COMPLETE
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/architecture-dark.svg">
+  <img src="docs/architecture-light.svg" alt="The RSI Loop: a self-improving detector proposes new thresholds; Stage 1 checks accuracy against labelled benchmarks (below 90% the audit never runs); Stage 2 audits the surviving thresholds against the Clinical Gold Standard — in range is accepted as COMPLETE, outside is rejected as NOT_COMPLIANT and the iteration returns to the optimiser. Passing the test is necessary but not sufficient." width="100%">
+</picture>
 
 ### Stage 1 — Accuracy (Benchmarks)
 `test_engine.py` runs `detector.assess` against every labelled scenario in `benchmarks.json` and computes precision, recall, F1 and accuracy. Anything under the 90 % accuracy gate exits with code `1` (`NOT_ACCURATE`) and the auditor is **not** invoked — there is no point auditing a model that does not work.
