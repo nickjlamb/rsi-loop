@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The RSI Loop — A Validated Recursive Self-Improvement System | PharmaTools.AI</title>
-<meta name="description" content="A closed-loop agentic framework that evolves its own ergonomic detection logic, supervised by a clinical-compliance auditor that prevents reward hacking. Built by Nick Lamb.">
+<title>The RSI Loop — A Two-Stage Acceptance Gate for a Self-Modifying Detector | PharmaTools.AI</title>
+<meta name="description" content="A small, deterministic prototype of an acceptance gate that lets an ergonomic detector change, but only inside a clinical envelope — with an honest audit of what the gate does and does not catch. Built by Nick Lamb.">
 
 <!-- Open Graph / social sharing -->
 <meta property="og:type" content="article">
 <meta property="og:title" content="The RSI Loop — Using RSI to solve RSI">
-<meta property="og:description" content="A validated Recursive Self-Improvement system that evolves its own ergonomic-detection logic, gated by a clinical compliance auditor.">
+<meta property="og:description" content="A two-stage acceptance gate for a self-modifying ergonomic detector, and an audit of what it does and does not catch.">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/nickjlamb/rsi-loop@main/og.png">
 <meta property="og:url" content="https://pharmatools.ai/rsi-loop">
 <meta name="twitter:card" content="summary_large_image">
@@ -588,13 +588,13 @@ html { font-size: 15px; }
 <header class="proj-hero">
 <div class="page-width">
 <span class="proj-kicker">Lab · Experiment</span>
-<h1>The RSI Loop: A Validated <strong>Recursive Self-Improvement</strong> System</h1>
-<p class="proj-subtitle">Using RSI to solve RSI: a closed-loop agentic framework for ergonomic safety.</p>
+<h1>The RSI Loop: A Two-Stage Acceptance Gate for a <strong>Self-Modifying</strong> Detector</h1>
+<p class="proj-subtitle">Using RSI to solve RSI: a small, deterministic prototype of a gate that lets a detector change, but only inside a clinical envelope.</p>
 
 <div class="proj-meta">
 <span class="proj-meta-item">Stack <strong>Python · MediaPipe · rich</strong></span>
 <span class="proj-meta-item">Lines <strong>~1,150</strong></span>
-<span class="proj-meta-item">Status <strong>v2 — COMPLETE</strong></span>
+<span class="proj-meta-item">Status <strong>v2 — gate prototype · audited Sept 2026</strong></span>
 <span class="proj-meta-item">Author <strong>Nick Lamb</strong></span>
 </div>
 
@@ -619,9 +619,9 @@ Watch the Narrated Demo
 <h2 class="section-heading">The whole loop in 30 seconds</h2>
 <div class="section-body">
 <div class="demo-frame reveal">
-<img src="https://cdn.jsdelivr.net/gh/nickjlamb/rsi-loop@main/demo.gif" alt="Terminal recording: Cycle 1 (v1 detector) fails on radial wrist deviation at 90% accuracy, the system analyses the geometric flaw and proposes vector trigonometry, Cycle 2 (v2) reaches 100%, the regulatory Auditor confirms thresholds are inside the Clinical Gold Standard, and the final RSI Loop status is COMPLETE." loading="lazy" decoding="async">
+<img src="https://cdn.jsdelivr.net/gh/nickjlamb/rsi-loop@main/demo.gif" alt="Terminal recording: the v1 detector fails on radial wrist deviation at 90% accuracy, a narrative panel explains the hand-authored geometric fix, the v2 detector reaches 100%, the Auditor confirms thresholds are inside the Clinical Gold Standard, and the final status is COMPLETE." loading="lazy" decoding="async">
 </div>
-<p class="demo-caption">Recording of <code>python3 demo.py</code>. Real-time, no editing — Cycle 1 (flawed) → analysis → Cycle 2 (corrected) → regulatory audit → COMPLETE.</p>
+<p class="demo-caption">Real-time recording of <code>python3 demo.py</code>, which replays a hand-authored v1 → v2 change and the audit. The "analysis" panel describes a fix I made; no optimiser generated it.</p>
 </div>
 </div>
 </section>
@@ -634,7 +634,7 @@ Watch the Narrated Demo
 <div class="section-body reveal">
 <p class="lead">The same three letters describe both the hardest open problem in AI safety and the most common occupational injury among the people building it.</p>
 <p>RSI in machine-learning circles is <em>Recursive Self-Improvement</em> — a system that edits its own logic to get better at its objective. RSI in physiotherapy is <em>Repetitive Strain Injury</em> — what happens to your forearms after a few thousand keystrokes a week. The first one is a frontier-lab anxiety; the second is what you actually wake up with on a Wednesday after shipping a frontier-lab feature on a Tuesday.</p>
-<p>This project leans into the joke. It is a Recursive-Self-Improvement system whose job is to detect Repetitive-Strain-Injury risk. The loop edits its own ergonomic detector against a benchmark suite — and the only thing standing between the loop and a perfectly self-satisfied 999° wrist threshold is a regulatory auditor that asks, in effect, "Would a clinician actually sign off on this?"</p>
+<p>This project leans into the joke, with one honest caveat up front. It is the <em>gate</em> a self-modifying Repetitive-Strain-Injury detector would need — a benchmark check plus a regulatory auditor that asks, in effect, "Would a clinician actually sign off on this?" — applied to a detector that, in this version, I changed by hand. The repository contains the gate; the loop that would run inside it is the follow-up experiment described at the end of this page.</p>
 </div>
 </div>
 </section>
@@ -645,7 +645,7 @@ Watch the Narrated Demo
 <p class="section-label"><span class="section-num">02</span>Architecture</p>
 <h2 class="section-heading">A two-stage validation pipeline</h2>
 <div class="section-body">
-<p>Self-improving systems fail when their objective is too easy to satisfy. The RSI Loop separates "did it work?" (Stage&nbsp;1) from "is the result clinically meaningful?" (Stage&nbsp;2). The optimiser is free to mutate thresholds; only iterations that pass <em>both</em> stages are accepted as <code>COMPLETE</code>.</p>
+<p>Self-improving systems fail when their objective is too easy to satisfy. The RSI Loop separates "did it work?" (Stage&nbsp;1) from "is the result clinically meaningful?" (Stage&nbsp;2). A candidate detector — today, one I wrote by hand — is accepted as <code>COMPLETE</code> only if it passes <em>both</em> stages.</p>
 <p style="font-size: 0.85rem; color: var(--muted); font-style: italic; padding: 0.6rem 0.9rem; border-left: 2px solid var(--rule); max-width: 60ch; margin-bottom: 1.5rem;">Read top to bottom — each stage produces a verdict and an exit code, and the loop is <code style="font-style: normal;">COMPLETE</code> only if both verdicts are <code style="font-style: normal;">PASS</code>.</p>
 
 <div class="pipeline reveal">
@@ -653,7 +653,7 @@ Watch the Narrated Demo
 <div class="stage stage-accuracy">
 <span class="stage-tag">Stage 01 · Accuracy</span>
 <h3>Does the detector classify posture correctly?</h3>
-<p class="stage-lede">The optimiser tunes <code>detector.py</code> against <code>benchmarks.json</code> until it correctly labels every ground-truth scenario — including the v1 radial-deviation blind spot that v2 fixes with vector trigonometry.</p>
+<p class="stage-lede"><code>detector.py</code> is scored against <code>benchmarks.json</code>. v1 failed one scenario (a radial-deviation blind spot); v2 fixes it with vector trigonometry and passes all ten.</p>
 <dl class="stage-grid">
 <dt>Inputs</dt>      <dd>10 labelled scenarios (Safe / High Strain) from <code>benchmarks.json</code></dd>
 <dt>Process</dt>     <dd><code>detector.assess(landmarks)</code> over each scenario</dd>
@@ -671,8 +671,8 @@ Watch the Narrated Demo
 
 <div class="stage stage-compliance">
 <span class="stage-tag">Stage 02 · Compliance</span>
-<h3>Are the AI-tuned thresholds clinically plausible?</h3>
-<p class="stage-lede">The Auditor reads the live thresholds out of <code>detector.py</code> via <code>getattr</code> and compares each one against the <em>Clinical Gold Standard</em>. A loop that hacks thresholds into impossible values gets caught here, even if Stage 1 was satisfied.</p>
+<h3>Are the thresholds clinically plausible?</h3>
+<p class="stage-lede">The Auditor reads the live thresholds out of <code>detector.py</code> via <code>getattr</code> and compares each one against the <em>Clinical Gold Standard</em>. A candidate with thresholds outside the clinical range is rejected here even if Stage 1 was satisfied. One caveat: on this benchmark the two stages never disagree — every threshold inside the clinical range scores 100 % — so the gate has not been tested under optimisation pressure.</p>
 <dl class="stage-grid">
 <dt>Standard</dt>    <dd>Forward-head <code>15–25°</code> · Wrist deviation <code>40–60°</code></dd>
 <dt>Tolerance</dt>   <dd>±5° warning band; beyond → hard failure</dd>
@@ -699,14 +699,14 @@ Watch the Narrated Demo
 <section>
 <div class="page-width">
 <p class="section-label"><span class="section-num">03</span>Evolution Log</p>
-<h2 class="section-heading">Cycle 1 → Cycle 2, captured live</h2>
+<h2 class="section-heading">v1 → v2, replayed</h2>
 <div class="section-body">
-<p>Cycle 1's detector used a signed horizontal offset (<code>hand_x − wrist_x &gt; 0.10</code>) — direction-blind, so it caught ulnar deviation but silently missed radial deviation on scenario&nbsp;S06. Cycle 2 replaced both heuristics with proper trigonometric angles between the forearm and metacarpal vectors, and the loop converged.</p>
+<p>The v1 detector used a signed horizontal offset (<code>hand_x − wrist_x &gt; 0.10</code>) — direction-blind, so it caught ulnar deviation but silently missed radial deviation on scenario&nbsp;S06. I replaced both heuristics with proper trigonometric angles between the forearm and metacarpal vectors, and v2 passes. <code>demo.py</code> narrates this change; it does not generate it.</p>
 
-<div class="terminal reveal" role="img" aria-label="Terminal output of demo.py showing the v1 to v2 self-improvement cycle.">
+<div class="terminal reveal" role="img" aria-label="Terminal output of demo.py replaying the hand-authored v1 to v2 change.">
 <div class="terminal-bar">
 <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
-<span class="terminal-bar-title">demo.py — RSI Loop Self-Improvement</span>
+<span class="terminal-bar-title">demo.py — RSI Loop v1 → v2 replay</span>
 </div>
 <div class="terminal-body"><span class="term-prompt">$</span> python3 demo.py
 <span class="term-rule">────────────────────────────────────────────────────────────────</span>
@@ -718,7 +718,7 @@ Watch the Narrated Demo
 
   Accuracy <span class="term-fail">90%</span>   Precision 100%   Recall <span class="term-fail">80%</span>   F1 0.89
 <span class="term-rule">────────────────────────────────────────────────────────────────</span>
-<span class="term-cycle">SELF-IMPROVEMENT — Analysis &amp; Proposed Fix</span>
+<span class="term-cycle">ANALYSIS &amp; PROPOSED FIX (hand-authored)</span>
 
   <span class="term-key">Failure</span>:  v1's signed offset (<span class="term-em">hand_x − wrist_x</span>) only fires
             when displacement is positive. Radial deviation
@@ -750,7 +750,28 @@ Watch the Narrated Demo
 <span class="term-em">RSI LOOP STATUS:</span> <span class="term-complete">COMPLETE</span>  <span class="term-dim">— accurate AND compliant</span></div>
 </div>
 
-<p style="margin-top: 1.2rem;">The same code path also catches a subtler, more dangerous attack: drift the wrist threshold to <code>67°</code> and Stage 1 still passes 100%, but Stage 2 returns <code>HARD FAILURE</code> (7° beyond the clinical max), the loop is rejected, and the iteration is discarded.</p>
+<p style="margin-top: 1.2rem;">The gate does catch the attack it was designed for: drift the wrist threshold to <code>67°</code> and Stage 1 still passes 100%, but Stage 2 returns <code>HARD FAILURE</code> (7° beyond the clinical max) and the candidate is rejected.</p>
+
+<p>It also has holes, found in a September 2026 audit and each reproduced against an untouched copy of the code:</p>
+
+<div class="next-grid reveal">
+<div class="next-card">
+<h4>Same-process tampering</h4>
+<p>The Auditor reads thresholds from the live <code>detector</code> module, and <code>assess()</code> runs before <code>run_audit()</code>. Three lines inside <code>assess()</code> that import <code>auditor</code> and rewrite the gold standard let the 67° threshold pass as <code>COMPLETE</code>.</p>
+</div>
+<div class="next-card">
+<h4>Lookup-table memorisation</h4>
+<p>A <code>detector.py</code> that opens <code>benchmarks.json</code> and returns the stored label on an exact landmark match scores 100 % and passes the audit with thresholds untouched. The evaluator cannot tell a table from a classifier.</p>
+</div>
+<div class="next-card">
+<h4>Gate tolerance</h4>
+<p>A forward-head threshold of <code>15.0°</code> — inside the clinical range — misclassifies scenario S08 (15.07°) and is still certified <code>COMPLETE</code>, because 90 % clears the accuracy gate.</p>
+</div>
+<div class="next-card">
+<h4>Camera-roll sensitivity</h4>
+<p>v2 measures forward-head angle against the <em>image</em> vertical, not the torso. Rotating the benchmark landmarks to simulate a tilted webcam gives 90 % at +5°, 80 % at +15° and 60 % at +20°. The benchmark, which has no roll, cannot see this.</p>
+</div>
+</div>
 </div>
 </div>
 </section>
@@ -781,7 +802,7 @@ Watch the Narrated Demo
 </tr>
 <tr>
 <td>Performance Qualification (PQ)</td>
-<td>Stage&nbsp;2 — the Auditor proves AI-tuned thresholds stay within clinically acceptable bounds</td>
+<td>Stage&nbsp;2 — the Auditor checks that the thresholds stay within clinically acceptable bounds</td>
 </tr>
 <tr>
 <td>Change control</td>
@@ -789,16 +810,16 @@ Watch the Narrated Demo
 </tr>
 <tr>
 <td>Independence of QA</td>
-<td>The Auditor is a separate module reading thresholds via <code>getattr(detector, …)</code> — the loop cannot self-certify</td>
+<td><em>Not yet achieved.</em> The Auditor is a separate module, but it runs in the same process as the candidate, and a candidate can rewrite the gold standard before it is read. Process isolation is the first fix in the follow-up design.</td>
 </tr>
 <tr>
 <td>Audit trail</td>
-<td><code>last_run.json</code> persists every cycle's metrics + audit verdict for diff against future iterations</td>
+<td><code>last_run.json</code> persists each run's metrics + audit verdict for diff against future versions</td>
 </tr>
 </tbody>
 </table>
 
-<p>The takeaway for pharma audiences: <strong>self-improving AI does not have to be incompatible with regulated environments.</strong> What it needs is the same structure pharma already trusts — an external, immutable spec, with the optimiser bounded inside it. The RSI Loop is a 1,150-line proof of concept for that pattern, in a domain (ergonomics) that's friendly enough to host it without regulatory entanglement.</p>
+<p>The takeaway for pharma audiences: <strong>an acceptance gate with an external, immutable spec is a pattern regulated environments already understand.</strong> The RSI Loop is a 1,150-line sketch of that shape, in a domain (ergonomics) that's friendly enough to host it without regulatory entanglement. Whether the shape holds against a real optimiser — one that can rewrite the detector in full and is under pressure to score well — is exactly what the follow-up experiment tests.</p>
 </div>
 </div>
 </section>
@@ -809,24 +830,24 @@ Watch the Narrated Demo
 <p class="section-label"><span class="section-num">05</span>Limitations &amp; Roadmap</p>
 <h2 class="section-heading">What this prototype is — and isn't</h2>
 <div class="section-body">
-<p>This is a deliberately small, deliberately observable prototype. The point is the <em>pattern</em>, not the model. Honest about what's still missing:</p>
+<p>This is a deliberately small, deliberately observable prototype. The point is the <em>shape of the gate</em>, not the model. Honest about what it is and isn't:</p>
 
 <div class="next-grid reveal">
 <div class="next-card">
 <h4>Today</h4>
-<p>Synthetic benchmark suite (10 hand-authored landmark sets). Two detection rules. Static Clinical Gold Standard hard-coded in the Auditor. Deterministic optimiser steps proposed by the developer.</p>
+<p><strong>No optimiser.</strong> The v1 → v2 change was made by hand, with full visibility of every benchmark case and every auditor interval. Synthetic benchmark suite (10 hand-authored landmark sets, labels assigned by construction). Two detection rules. Static Clinical Gold Standard hard-coded in the Auditor. Verifier in the same process as the candidate.</p>
 </div>
 <div class="next-card">
 <h4>Next</h4>
-<p>Real webcam pilot with MediaPipe-streamed pose data. Larger benchmark suite drawn from labelled real footage. Additional rules (shoulder elevation, mouse-arm extension). Auditor sourced from a versioned ergonomic-literature dataset rather than constants in code.</p>
+<p>Turn the gate into an experiment: an LLM optimiser that rewrites <code>detector.py</code> in full for twenty generations; a seeded simulator whose latent angles define the truth; a visible benchmark drawn from a narrow distribution and a hidden one from a broad distribution (camera roll, either hand, realistic noise); a process-isolated verifier; every proposal scored on the hidden set. The question is which verification architectures keep genuine performance, not just measured performance. The preregistration draft is in the repo at <code>docs/rsi-loop-2-research-design.md</code>.</p>
 </div>
 <div class="next-card">
 <h4>Later</h4>
-<p>Generalise the two-stage pattern to any agentic loop: replace Clinical Gold Standard with whatever immutable spec governs the target domain (ABPI for promotional copy, ICH-E6 for trial design, etc.). The RSI Loop becomes a template, not a product.</p>
+<p>If the gate holds up under a real optimiser, generalise the two-stage pattern: replace the Clinical Gold Standard with whatever immutable spec governs the target domain (ABPI for promotional copy, ICH-E6 for trial design, etc.). If it doesn't hold up, that result is the more useful one.</p>
 </div>
 <div class="next-card">
 <h4>Won't</h4>
-<p>This will not become a clinical device, a workplace surveillance tool, or a substitute for a real ergonomist. The intent is methodological — to demonstrate validated self-improvement in a small, portable form.</p>
+<p>This will not become a clinical device, a workplace surveillance tool, or a substitute for a real ergonomist. The intent is methodological — to show the shape of a domain-grounded acceptance gate in a small, portable form, and to be honest about what it has and hasn't been tested against.</p>
 </div>
 </div>
 </div>
@@ -836,8 +857,8 @@ Watch the Narrated Demo
 <!-- FINAL CTA -->
 <section class="final-cta">
 <div class="page-width final-cta-inner">
-<h2>Read the code, watch the loop close.</h2>
-<p>Everything is in one repo: detector, auditor, benchmarks, narrated demo, and the recording you saw above. About 1,150 lines, MIT-licensed, runs on a laptop in under a second.</p>
+<h2>Read the code, then read the audit.</h2>
+<p>Everything is in one repo: detector, auditor, benchmarks, narrated demo, the recording you saw above, and the audit plus follow-up design in <code>docs/</code>. About 1,150 lines, MIT-licensed, runs on a laptop in under a second.</p>
 <div class="proj-ctas" style="justify-content: center;">
 <a class="btn-primary" href="https://github.com/nickjlamb/rsi-loop">
 <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.69-.01-1.36-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.81.06 1.23.83 1.23.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.03 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38C13.71 14.53 16 11.54 16 8c0-4.42-3.58-8-8-8z"/></svg>
