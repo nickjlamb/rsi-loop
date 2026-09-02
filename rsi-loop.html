@@ -14,6 +14,55 @@
 <meta property="og:url" content="https://pharmatools.ai/rsi-loop">
 <meta name="twitter:card" content="summary_large_image">
 
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "What does RSI mean in AI?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "In AI, RSI stands for recursive self-improvement: a system that improves its own ability to improve — rewriting its own logic, tuning its own thresholds, or upgrading the very process it uses to get better. The RSI Loop is a small, inspectable prototype of the gate such a system would need, applied to a detector for the other RSI, repetitive strain injury. In the current version the changes to the detector were made by hand; a follow-up experiment adds the optimiser."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "What is recursive self-improvement, in plain terms?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "A normal program is improved by its developers. A recursively self-improving system proposes changes to itself — to its detection logic, thresholds or code — evaluates whether the change made it better, and keeps what works. It is recursive because the thing being improved is also the thing doing the improving, so gains can compound from cycle to cycle."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Is recursive self-improvement dangerous?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Unbounded self-improvement is a core AI-safety concern: a system optimising itself against a narrow score can drift into behaviour its designers never intended. The RSI Loop sketches one mitigation pattern — a two-stage gate in which a candidate change must pass both an accuracy check and an independent auditor that holds the system inside clinically plausible bounds. Whether that gate holds against an optimiser that can rewrite the detector in full has not been tested in the current version; that is the follow-up experiment."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "What is the RSI Loop, concretely?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "A Python prototype (about 1,150 lines) that detects repetitive-strain risk from posture landmarks, plus a two-stage acceptance gate. The v1 to v2 change that lifted benchmark accuracy from 90% to 100% was made by hand, with both thresholds inside gold-standard clinical ranges; there is no optimiser in the current code. A September 2026 audit found that the gate can be rewritten from inside the candidate's process, cannot distinguish a lookup table from a classifier, and cannot see that v2 is sensitive to camera roll."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "How is RSI different from ordinary machine learning?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Ordinary training improves a model against a fixed objective, under a process the developers control. In recursive self-improvement, the system also modifies the improvement process itself — proposing new logic, tests or thresholds. That autonomy is what makes RSI powerful, and what makes independent verification essential."
+   }
+  }
+ ]
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;1,6..72,300;1,6..72,400&family=Inter:wght@300;400;500;600&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
 
@@ -212,6 +261,21 @@ color: var(--muted);
 max-width: 60ch;
 margin-bottom: 1.5rem;
 }
+
+/* === FAQ === */
+.faq { max-width: 68ch; }
+.faq-item { padding: 1.4rem 0; border-bottom: 1px solid var(--rule); }
+.faq-item:last-child { border-bottom: none; }
+.faq-item h3 {
+font-family: 'Newsreader', serif;
+font-size: 1.25rem;
+font-weight: 400;
+letter-spacing: -0.01em;
+color: var(--ink);
+margin-bottom: 0.6rem;
+}
+.faq-item p { margin-bottom: 0.8rem; }
+.faq-item p:last-child { margin-bottom: 0; }
 
 /* === DEMO GIF === */
 .demo-frame {
@@ -848,6 +912,37 @@ Watch the Narrated Demo
 <div class="next-card">
 <h4>Won't</h4>
 <p>This will not become a clinical device, a workplace surveillance tool, or a substitute for a real ergonomist. The intent is methodological — to show the shape of a domain-grounded acceptance gate in a small, portable form, and to be honest about what it has and hasn't been tested against.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- 06 — FAQ -->
+<section>
+<div class="page-width">
+<p class="section-label"><span class="section-num">06</span>FAQ</p>
+<h2 class="section-heading">What does RSI mean in AI?</h2>
+<div class="section-body">
+<p>In AI, <strong>RSI stands for recursive self-improvement</strong>: a system that improves its own ability to improve — rewriting its own logic, tuning its own thresholds, or upgrading the very process it uses to get better. Each cycle compounds on the last, which is why RSI sits at the centre of debates about accelerating AI capability and how to keep it under meaningful oversight.</p>
+<p>This page is a small, inspectable prototype of the <em>gate</em> such a system would need — applied to a detector that targets the other RSI, repetitive strain injury. In this version the changes to the detector were made by hand; the follow-up experiment described above adds the optimiser.</p>
+
+<div class="faq reveal">
+<div class="faq-item">
+<h3>What is recursive self-improvement, in plain terms?</h3>
+<p>A normal program is improved by its developers. A recursively self-improving system proposes changes to itself — to its detection logic, thresholds or code — evaluates whether the change made it better, and keeps what works. It is "recursive" because the thing being improved is also the thing doing the improving, so gains can compound from cycle to cycle.</p>
+</div>
+<div class="faq-item">
+<h3>Is recursive self-improvement dangerous?</h3>
+<p>Unbounded self-improvement is a core AI-safety concern: a system optimising itself against a narrow score can drift into behaviour its designers never intended. The RSI Loop sketches one mitigation pattern — a two-stage gate in which a candidate change must pass both an accuracy check and an independent auditor that holds the system inside clinically plausible bounds. Whether that gate holds against an optimiser that can rewrite the detector in full, and is under pressure to score well, has not been tested here; that is the follow-up experiment.</p>
+</div>
+<div class="faq-item">
+<h3>What is the RSI Loop, concretely?</h3>
+<p>A Python prototype (~1,150 lines) that detects repetitive-strain risk from posture landmarks, plus a two-stage acceptance gate. The v1 → v2 change that lifted benchmark accuracy from 90 % to 100 % was made by hand, with both thresholds inside gold-standard clinical ranges; there is no optimiser in the current code. A September 2026 audit found that the gate can be rewritten from inside the candidate's process, cannot distinguish a lookup table from a classifier, and cannot see that v2 is sensitive to camera roll.</p>
+</div>
+<div class="faq-item">
+<h3>How is RSI different from ordinary machine learning?</h3>
+<p>Ordinary training improves a model against a fixed objective, under a process the developers control. In recursive self-improvement, the system also modifies the improvement process itself — proposing new logic, tests or thresholds. That autonomy is what makes RSI powerful, and what makes independent verification essential — which is why the follow-up design keeps the optimiser and the verifier in separate processes with separate information.</p>
 </div>
 </div>
 </div>
