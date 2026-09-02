@@ -1,9 +1,11 @@
-# The RSI Loop — A Validated Self-Improving Detector for Repetitive Strain Injury
+# The RSI Loop — A Two-Stage Acceptance Gate for a Posture-Risk Detector
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/python-3.x-blue.svg)
 
-**The RSI Loop** is a self-improving (Recursive Self-Improvement) computer-vision pipeline that detects ergonomic risks for Repetitive Strain Injury in computer users. It estimates **forward-head posture** and **wrist ulnar/radial deviation** from MediaPipe pose and hand landmarks, improves its own detection logic against a benchmark suite, and is supervised by a regulatory Auditor that keeps the self-evolved thresholds inside published clinical norms.
+**The RSI Loop** is a small, deterministic proof-of-concept: a geometric detector for Repetitive Strain Injury risk (forward-head posture and wrist deviation from MediaPipe-style landmarks), wrapped in a two-stage acceptance gate. Stage 1 checks accuracy against a labelled benchmark; Stage 2 checks that the detector's thresholds sit inside published clinical ranges. A candidate detector is accepted only if it passes both.
+
+The name is a pun — RSI is both Repetitive Strain Injury and Recursive Self-Improvement — and the gate was designed with self-improving systems in mind. But be clear about what this repository contains: **there is no optimiser in it.** The v1 → v2 change that `demo.py` replays was written by hand. What the code demonstrates is the *gate*, not a system that improves itself. A follow-up experiment that adds a real LLM optimiser, a hidden evaluation distribution and a process-isolated verifier is designed in [`docs/rsi-loop-2-research-design.md`](docs/rsi-loop-2-research-design.md); an audit of this version's limitations is in the [Known limitations](#known-limitations) section below.
 
 > Built for the [pharmatools.ai](https://pharmatools.ai) portfolio.
 
@@ -11,9 +13,9 @@
 
 ## Demo
 
-![The RSI Loop in action — v1 fails on a radial-deviation case, the loop self-corrects to v2, the regulatory Auditor signs off, and the final status is COMPLETE.](demo.gif)
+![The RSI Loop demo — v1 fails on a radial-deviation case, the hand-authored v2 fix passes, the auditor signs off, and the final status is COMPLETE.](demo.gif)
 
-The recording above is the full output of [`demo.py`](demo.py): cycle 1 (flawed v1 detector → 90% accuracy), the self-improvement analysis, cycle 2 (corrected v2 → 100%), and the Stage 2 regulatory audit. A higher-fidelity version is also committed as [`demo.cast`](demo.cast) — play it locally with `asciinema play demo.cast` or upload it with `asciinema upload demo.cast`.
+The recording is the output of [`demo.py`](demo.py): cycle 1 (the original, flawed v1 detector → 90 % accuracy), a narrative panel explaining the fix, cycle 2 (the corrected v2 → 100 %), and the Stage 2 audit. The "self-improvement" panel is a description of a change I made, not the output of an optimiser. A higher-fidelity recording is committed as [`demo.cast`](demo.cast) — play it with `asciinema play demo.cast`.
 
 ---
 
@@ -21,7 +23,7 @@ The recording above is the full output of [`demo.py`](demo.py): cycle 1 (flawed 
 
 ```bash
 python3 -m pip install -r requirements.txt
-python3 demo.py            # narrated v1 → v2 evolution + final audit (start here)
+python3 demo.py            # narrated v1 → v2 walkthrough + final audit (start here)
 python3 test_engine.py     # unnarrated run, machine-readable output
 python3 auditor.py         # Stage-2 audit only
 ```
@@ -30,9 +32,9 @@ python3 auditor.py         # Stage-2 audit only
 
 ## Why this project exists
 
-Self-improving systems have a well-known failure mode: **specification gaming**, also known as **reward hacking**. If the only objective is "pass the test suite," a sufficiently flexible loop will mutate its parameters into values that satisfy the metric but destroy real-world meaning. A wrist-deviation threshold of 999° passes every benchmark — and is also useless on a real user.
+Self-improving systems have a well-known failure mode: **specification gaming**, also called **reward hacking**. If the only objective is "pass the test suite", a sufficiently flexible optimiser will find parameters that satisfy the metric while destroying real-world meaning. A wrist-deviation threshold of 999° passes any benchmark in which nothing trips it — and is useless on a real user.
 
-The RSI Loop demonstrates a *Validated* form of self-improvement: a two-stage gate that lets the loop optimise freely, but only accepts iterations that are simultaneously **accurate** and **clinically plausible**.
+The RSI Loop sketches one answer: a two-stage gate in which passing the benchmark is necessary but not sufficient, and the second stage is grounded in domain knowledge that lives *outside* the benchmark. It is a sketch of the gate, not a test of it under optimisation pressure — see [Known limitations](#known-limitations).
 
 ---
 
@@ -40,22 +42,22 @@ The RSI Loop demonstrates a *Validated* form of self-improvement: a two-stage ga
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/architecture-dark.svg">
-  <img src="docs/architecture-light.svg" alt="The RSI Loop: a self-improving detector proposes new thresholds; Stage 1 checks accuracy against labelled benchmarks (below 90% the audit never runs); Stage 2 audits the surviving thresholds against the Clinical Gold Standard — in range is accepted as COMPLETE, outside is rejected as NOT_COMPLIANT and the iteration returns to the optimiser. Passing the test is necessary but not sufficient." width="100%">
+  <img src="docs/architecture-light.svg" alt="The RSI Loop gate: a candidate detector is checked for accuracy against labelled benchmarks (below 90% the audit never runs), then its thresholds are audited against the Clinical Gold Standard — in range is accepted as COMPLETE, outside is rejected as NOT_COMPLIANT. Passing the test is necessary but not sufficient." width="100%">
 </picture>
 
 ### Stage 1 — Accuracy (Benchmarks)
-`test_engine.py` runs `detector.assess` against every labelled scenario in `benchmarks.json` and computes precision, recall, F1 and accuracy. Anything under the 90 % accuracy gate exits with code `1` (`NOT_ACCURATE`) and the auditor is **not** invoked — there is no point auditing a model that does not work.
+`test_engine.py` runs `detector.assess` against every labelled scenario in `benchmarks.json` and computes precision, recall, F1 and accuracy. Anything under the 90 % accuracy gate exits with code `1` (`NOT_ACCURATE`) and the auditor is **not** invoked.
 
 ### Stage 2 — Compliance (Auditor)
-Once Stage 1 passes, `auditor.run_audit()` reads each tunable constant out of `detector.py` (`getattr` against the live module) and matches it against the Clinical Gold Standard. Each threshold receives one of three statuses:
+Once Stage 1 passes, `auditor.run_audit()` reads each tunable constant out of `detector.py` (`getattr` against the live module) and compares it with the Clinical Gold Standard. Each threshold receives one of three statuses:
 
 | Status | Trigger | Effect on the loop |
 | --- | --- | --- |
 | `PASS` | Threshold inside the clinical range | Stage 2 passes |
 | `WARNING` | Inside the ±5° tolerance band but outside the clinical range | `NOT_COMPLIANT` |
-| `HARD FAILURE` | Outside the tolerance band, ≤ 0, or non-finite | `NOT_COMPLIANT` (likely reward-hacked) |
+| `HARD FAILURE` | Outside the tolerance band, ≤ 0, or non-finite | `NOT_COMPLIANT` |
 
-The final RSI Loop status is `COMPLETE` only when Stage 1 *and* Stage 2 are clean.
+The final status is `COMPLETE` only when Stage 1 *and* Stage 2 are clean. (Note that `WARNING` and `HARD FAILURE` both reject; the band changes the label, not the decision.)
 
 ### Clinical Gold Standard
 
@@ -70,21 +72,33 @@ Both ranges follow ergonomic literature on craniovertebral angle and ulnar/radia
 
 ---
 
-## How this prevents Specification Gaming / Reward Hacking
+## What the gate catches — and what it doesn't
 
-A common pitfall in any AI loop with an internal optimiser is **reward hacking**: the system finds a way to maximise its own score without solving the underlying problem. In a threshold-tuning loop, that looks like:
+The gate was designed against a hand-enumerated list of threshold attacks. Against that list it behaves as intended:
 
 | Attack | Stage 1 alone? | Stage 2 catches it? |
 | --- | --- | --- |
-| Set thresholds to absurd values (e.g. `wrist_threshold = 999°`) so nothing trips | ❌ — also misclassifies the High Strain scenarios | ✅ `HARD FAILURE` (way outside clinical range) |
-| Set thresholds to `0.0` so everything trips | ❌ — also misclassifies the Safe scenarios | ✅ `HARD FAILURE` (non-positive) |
-| Set thresholds to `NaN` / `inf` to short-circuit comparisons | depends on language semantics | ✅ `HARD FAILURE` (non-finite check) |
-| **Plausible-but-wrong**: nudge `wrist_threshold` to `67°` to "smooth over" a noisy benchmark | ✅ passes 100% | ✅ `HARD FAILURE` (7° beyond clinical max) |
-| Subtly drift `wrist_threshold` to `62°` | ✅ likely passes | ⚠️ `WARNING` — flagged for review, loop status `NOT_COMPLIANT` |
+| Set thresholds to absurd values (e.g. `wrist_threshold = 999°`) so nothing trips | ✅ caught — also misclassifies the High Strain scenarios | ✅ `HARD FAILURE` |
+| Set thresholds to `0.0` so everything trips | ✅ caught — also misclassifies the Safe scenarios | ✅ `HARD FAILURE` (non-positive) |
+| Set thresholds to `NaN` / `inf` | depends on language semantics | ✅ `HARD FAILURE` (non-finite) |
+| Plausible-but-wrong: `wrist_threshold = 67°` | ❌ passes 100 % | ✅ `HARD FAILURE` (7° beyond clinical max) |
+| Subtle drift: `wrist_threshold = 62°` | ❌ passes 100 % | ⚠️ `WARNING` → `NOT_COMPLIANT` |
 
-**The general principle: passing the test is necessary but not sufficient.** The thresholds must also look like something a clinician would write down. Stage 2 grounds the optimiser in domain knowledge that exists *outside* the benchmark suite, which is what makes the suite ungameable.
+To see this interactively, set `WRIST_DEVIATION_ANGLE_THRESHOLD_DEG = 67.0` in `detector.py` and re-run `python3 test_engine.py`: Stage 1 still passes, Stage 2 rejects.
 
-To verify the guard rail interactively, set `WRIST_DEVIATION_ANGLE_THRESHOLD_DEG = 67.0` in `detector.py` and re-run `python3 test_engine.py`. Stage 1 still passes 100% — but Stage 2 returns `HARD FAILURE` (67° is 7° beyond the clinical maximum, outside the ±5° tolerance band), the final status flips to `NOT_COMPLIANT`, and the iteration is rejected.
+Two things the table hides. First, the 999° and 0.0 attacks are caught by Stage 1, not Stage 2; the auditor's unique contribution is rejecting values in the 60°–70° band that Stage 1 assigns no advantage to anyway. Second, on this benchmark the two stages can never disagree: the Safe cases have wrist metrics ≤ 36.6° and forward-head ≤ 15.1°, the High Strain cases ≥ 67.5° and ≥ 31.6°, so any threshold inside the clinical ranges scores 100 %. There is no optimisation pressure toward 67°, and nothing here shows the gate holding under pressure.
+
+### Known limitations
+
+An audit of this version (September 2026) found the following, each reproduced against an untouched copy of the code:
+
+1. **The verifier shares a process with the candidate.** `auditor.py` reads thresholds from the live `detector` module, and `detector.assess()` runs before `run_audit()`. Three lines inside `assess()` that import `auditor` and rewrite `CLINICAL_GOLD_STANDARD` let a 67° threshold pass with `COMPLETE`. The gate can be rewritten by the thing it gates.
+2. **The evaluator cannot distinguish a lookup table from a classifier.** A `detector.py` that opens `benchmarks.json` and returns the stored label on an exact landmark match scores 100 % and passes the audit with thresholds untouched.
+3. **The 90 % gate tolerates a known misclassification.** A forward-head threshold of 15.0° (inside the clinical range) misclassifies scenario S08 (15.07°) and is still certified `COMPLETE`.
+4. **The shipped v2 detector is sensitive to camera roll.** Forward-head angle is measured against the *image* vertical rather than the torso axis. Rotating the benchmark landmarks about the shoulder to simulate a tilted webcam gives 90 % at +5°, 80 % at +15° and 60 % at +20°. The benchmark, which has no roll, cannot see this.
+5. **There is no optimiser and no loop.** No code path proposes, searches or selects anything. The v1 → v2 change was made by hand with full visibility of every benchmark case and every auditor interval.
+
+None of these is fixed in this repository; fixing them properly is the follow-up experiment. The intended lesson of this version is narrower than the original README claimed: *a domain-grounded second stage is a sensible shape for an acceptance gate*. Whether it holds against an actual optimiser is an open question this code cannot answer.
 
 ---
 
@@ -93,23 +107,24 @@ To verify the guard rail interactively, set `WRIST_DEVIATION_ANGLE_THRESHOLD_DEG
 | File | Role |
 | --- | --- |
 | `detector.py` | Pure geometric classifier. Forward-head and wrist-deviation angles, with two tunable thresholds. Optional MediaPipe webcam pipeline (lazy-imported). |
-| `benchmarks.json` | 10 labelled ground-truth scenarios — neutral typing, forward head, ulnar deviation, radial deviation, combined strain, borderline cases. |
+| `benchmarks.json` | 10 hand-authored scenarios — neutral typing, forward head, ulnar deviation, radial deviation, combined strain, borderline cases. Labels are assigned by construction, not measured. |
 | `auditor.py` | Loads thresholds from `detector.py`, compares them to the Clinical Gold Standard, emits a `PASS` / `WARNING` / `HARD FAILURE` compliance report. |
-| `test_engine.py` | Two-stage harness: accuracy on benchmarks → audit → final status. Prints the rich Self-Improvement Log and persists `last_run.json`. |
-| `demo.py` | Narrated single-run tour: replays the v1 → v2 evolution and the final audit. **Recommended entry point for reviewers.** |
+| `test_engine.py` | Two-stage harness: accuracy on benchmarks → audit → final status. Persists `last_run.json`. |
+| `demo.py` | Narrated walkthrough: replays the hand-authored v1 → v2 change and the final audit. |
 | `requirements.txt` | `mediapipe`, `opencv-python`, `rich`, `pytest`. |
-| `last_run.json` | Machine-readable summary of the most recent run, for diffing across iterations. |
+| `last_run.json` | Machine-readable summary of the most recent run. |
+| `docs/rsi-loop-2-research-design.md` | Audit of this version and the design for a follow-up experiment with a real LLM optimiser, a hidden evaluation distribution and a process-isolated verifier. |
 
 ---
 
-## The Self-Improvement Cycle, captured
+## The v1 → v2 change
 
-| Cycle | Detector | Forward-head check | Wrist check | Accuracy | Recall | Audit |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | v1 (intentionally flawed) | Signed `ear.x − shoulder.x > 0.15` | Signed one-sided `hand_x − wrist_x > 0.10` | 90 % | 80 % | not run (under gate) |
-| 2 | v2 (current) | `atan2` angle off vertical, threshold **20°** | Vector angle between forearm and metacarpal axes, threshold **50°** | **100 %** | **100 %** | **PASS** |
+| Version | Forward-head check | Wrist check | Accuracy | Recall | Audit |
+| --- | --- | --- | --- | --- | --- |
+| v1 (original) | Signed `ear.x − shoulder.x > 0.15` | Signed one-sided `hand_x − wrist_x > 0.10` | 90 % | 80 % | not run (under gate) |
+| v2 (current) | `atan2` angle off image vertical, threshold **20°** | Vector angle between forearm and metacarpal axes, threshold **50°** | **100 %** | **100 %** | **PASS** |
 
-Cycle 1 missed the radial-deviation scenario `S06` because v1's wrist check inspected only one side of the offset. The proposed fix replaced both crude offsets with proper trigonometric angles (direction-agnostic), and Cycle 2 reached `COMPLETE`.
+v1 missed the radial-deviation scenario `S06` because its wrist check inspected only one side of the offset. I replaced both crude offsets with trigonometric angles (direction-agnostic), and v2 reached `COMPLETE`. `demo.py` narrates this change; it does not generate it.
 
 ---
 
@@ -130,7 +145,7 @@ python3 -m pip install -r requirements.txt
 python3 -c "from detector import assess_from_webcam; print(assess_from_webcam())"
 ```
 
-The webcam pipeline is gated behind a lazy import, so the rest of the project runs without `mediapipe` or `opencv-python` installed.
+The webcam pipeline is gated behind a lazy import, so the rest of the project runs without `mediapipe` or `opencv-python` installed. Note limitation 4 above: the current geometry assumes an un-rolled camera.
 
 ---
 
@@ -138,4 +153,5 @@ The webcam pipeline is gated behind a lazy import, so the rest of the project ru
 
 - **Add benchmarks** by editing `benchmarks.json`. Each scenario needs the six landmarks the detector uses (`ear`, `shoulder`, `elbow`, `wrist`, `index_mcp`, `pinky_mcp`) plus a `Safe` / `High Strain` label.
 - **Add ergonomic rules** by adding a new pure-function angle helper in `detector.py` plus its threshold constant; then add a matching entry to `CLINICAL_GOLD_STANDARD` in `auditor.py` so the new constant is regulated from day one.
-- **Tighten the gold standard** if you have stronger clinical evidence — narrow the expected range and the loop is forced to converge on more conservative thresholds.
+- **Tighten the gold standard** if you have stronger clinical evidence — narrow the expected range and the gate forces more conservative thresholds.
+- **Turn it into an experiment** — see `docs/rsi-loop-2-research-design.md`.
