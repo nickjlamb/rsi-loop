@@ -1,87 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The RSI Loop: An Acceptance Gate for Recursive Self-Improvement | PharmaTools.AI</title>
-<meta name="description" content="What RSI means in AI (recursive self-improvement), why it is hard to keep under oversight, and a small, audited prototype of the acceptance gate a self-modifying system would need. By Nick Lamb.">
-
-<!-- Open Graph / social sharing -->
-<meta property="og:type" content="article">
-<meta property="og:title" content="The RSI Loop — Using RSI to solve RSI">
-<meta property="og:description" content="A two-stage acceptance gate for a self-modifying ergonomic detector, and an audit of what it does and does not catch.">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/nickjlamb/rsi-loop@main/og.png">
-<meta property="og:url" content="https://pharmatools.ai/rsi-loop">
-<meta name="twitter:card" content="summary_large_image">
-
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@type": "FAQPage",
- "mainEntity": [
-  {
-   "@type": "Question",
-   "name": "What does RSI mean in AI?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "In AI, RSI stands for recursive self-improvement: a system that improves its own ability to improve — rewriting its own logic, tuning its own thresholds, or upgrading the very process it uses to get better. The RSI Loop is a small, inspectable prototype of the gate such a system would need, applied to a detector for the other RSI, repetitive strain injury. In the current version the changes to the detector were made by hand; a follow-up experiment adds the optimiser."
-   }
-  },
-  {
-   "@type": "Question",
-   "name": "What is recursive self-improvement, in plain terms?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "A normal program is improved by its developers. A recursively self-improving system proposes changes to itself — to its detection logic, thresholds or code — evaluates whether the change made it better, and keeps what works. It is recursive because the thing being improved is also the thing doing the improving, so gains can compound from cycle to cycle."
-   }
-  },
-  {
-   "@type": "Question",
-   "name": "Is recursive self-improvement dangerous?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "Unbounded self-improvement is a core AI-safety concern: a system optimising itself against a narrow score can drift into behaviour its designers never intended. The RSI Loop sketches one mitigation pattern — a two-stage gate in which a candidate change must pass both an accuracy check and an independent auditor that holds the system inside clinically plausible bounds. Whether that gate holds against an optimiser that can rewrite the detector in full has not been tested in the current version; that is the follow-up experiment."
-   }
-  },
-  {
-   "@type": "Question",
-   "name": "What is the RSI Loop, concretely?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "A Python prototype (about 1,150 lines) that detects repetitive-strain risk from posture landmarks, plus a two-stage acceptance gate. The v1 to v2 change that lifted benchmark accuracy from 90% to 100% was made by hand, with both thresholds inside gold-standard clinical ranges; there is no optimiser in the current code. A September 2026 audit found that the gate can be rewritten from inside the candidate's process, cannot distinguish a lookup table from a classifier, and cannot see that v2 is sensitive to camera roll."
-   }
-  },
-  {
-   "@type": "Question",
-   "name": "What does RSI mean in computing?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "It depends on who is talking. In AI research, RSI is recursive self-improvement — a system that helps improve itself. In occupational health, including for anyone who spends the day at a keyboard, RSI is repetitive strain injury, the umbrella term for overuse conditions of the hands, wrists, arms and neck. In trading, RSI is the relative strength index, a momentum indicator with nothing to do with either. This page is about the first two, and the pun is deliberate: a gate for a self-improving detector of repetitive strain injury."
-   }
-  },
-  {
-   "@type": "Question",
-   "name": "What is RSI in machine learning?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "In machine learning, RSI is recursive self-improvement: a system that takes part in improving itself, rather than being improved only by its developers. Ordinary training improves a model against a fixed objective, under a process the developers control. In recursive self-improvement, the system also modifies the improvement process itself — proposing new logic, tests or thresholds. That autonomy is what makes RSI powerful, and what makes independent verification essential."
-   }
-  },
-  {
-   "@type": "Question",
-   "name": "How close is AI to RSI?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "Closer than it was, and not there yet, depending on what you count. Narrow forms already exist: systems such as AlphaEvolve and the Darwin Gödel Machine let a model rewrite parts of the code around itself and keep whatever scores better, and frontier labs now use their models to write much of their own research code. What does not yet exist is a system that improves the model itself, end to end, faster than its developers can check the result. In September 2026 OpenAI's chief scientist, Jakub Pachocki, wrote that machine RSI \"will be at the very core of future scientific discovery\" if progress continues, that no lab has yet solved alignment and monitoring well enough to keep scaling at full speed for much longer, and called for shared, externally audited safety bars. That is the frontier-scale version of the question this page asks at toy scale: when a system is allowed to change itself, who checks the change, with what information, and can the check be gamed?"
-   }
-  }
- ]
-}
-</script>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;1,6..72,300;1,6..72,400&family=Inter:wght@300;400;500;600&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
-
 <style>
 :root {
 --ink: #0f1a2e;
@@ -97,10 +15,8 @@
 --slate: #5b7a9d;
 --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
 }
-
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { font-size: 17px; scroll-behavior: smooth; }
-
 body {
 font-family: 'Inter', sans-serif;
 background: var(--paper);
@@ -108,15 +24,12 @@ color: var(--ink);
 line-height: 1.6;
 -webkit-font-smoothing: antialiased;
 }
-
 .page-width {
 max-width: 1100px;
 margin: 0 auto;
 padding: 0 2rem;
 }
-
 a { color: inherit; }
-
 /* === BACK NAV === */
 .subnav {
 border-bottom: 1px solid var(--rule);
@@ -132,7 +45,6 @@ gap: 0.4rem;
 transition: color 0.2s;
 }
 .subnav a:hover { color: var(--teal); }
-
 /* === HERO === */
 .proj-hero {
 padding: 4rem 0 2.5rem;
@@ -192,7 +104,6 @@ max-width: 50ch;
 margin-bottom: 2rem;
 line-height: 1.5;
 }
-
 .proj-meta {
 display: flex;
 flex-wrap: wrap;
@@ -212,7 +123,6 @@ font-weight: 500;
 font-family: 'Fira Code', monospace;
 font-size: 0.75rem;
 }
-
 .proj-ctas {
 display: flex;
 flex-wrap: wrap;
@@ -249,7 +159,6 @@ border-radius: 4px;
 transition: all 0.25s;
 }
 .btn-secondary:hover { border-color: var(--teal); color: var(--teal); }
-
 /* === SECTION LABELS === */
 .section-num {
 font-family: 'Fira Code', monospace;
@@ -292,7 +201,6 @@ color: var(--muted);
 max-width: 60ch;
 margin-bottom: 1.5rem;
 }
-
 /* === FAQ === */
 .faq { max-width: 68ch; }
 .faq-item { padding: 1.4rem 0; border-bottom: 1px solid var(--rule); }
@@ -307,7 +215,6 @@ margin-bottom: 0.6rem;
 }
 .faq-item p { margin-bottom: 0.8rem; }
 .faq-item p:last-child { margin-bottom: 0; }
-
 /* === DEMO GIF === */
 .demo-frame {
 margin: 1.5rem 0 0.5rem;
@@ -329,7 +236,6 @@ font-style: italic;
 margin-top: 0.6rem;
 font-family: 'Newsreader', serif;
 }
-
 /* === ARCHITECTURE / PIPELINE === */
 .pipeline {
 display: grid;
@@ -427,7 +333,6 @@ font-weight: 500;
 }
 .stage-gate .pass { color: var(--green); font-family: 'Fira Code', monospace; font-size: 0.78rem; }
 .stage-gate .fail { color: var(--red); font-family: 'Fira Code', monospace; font-size: 0.78rem; }
-
 .pipeline-arrow {
 text-align: center;
 font-family: 'Newsreader', serif;
@@ -436,7 +341,6 @@ font-size: 1.6rem;
 line-height: 1;
 margin: -0.4rem 0;
 }
-
 .final-status {
 border: 1px solid var(--green);
 background: rgba(45,122,79,0.05);
@@ -450,7 +354,6 @@ letter-spacing: 0.05em;
 margin-top: 0.5rem;
 }
 .final-status strong { font-weight: 500; }
-
 /* === TERMINAL EVOLUTION LOG === */
 .terminal {
 background: var(--ink);
@@ -496,7 +399,6 @@ overflow-x: auto;
 .term-em { color: #ffffff; font-weight: 500; }
 .term-dim { color: rgba(255,255,255,0.5); }
 .term-complete { color: #5fcf80; font-weight: 500; }
-
 /* === GxP TABLE === */
 .gxp-table {
 margin: 1rem 0;
@@ -537,7 +439,6 @@ padding: 0.1rem 0.4rem;
 border-radius: 2px;
 color: var(--ink);
 }
-
 /* === LIMITATIONS / NEXT === */
 .next-grid {
 display: grid;
@@ -565,7 +466,6 @@ line-height: 1.65;
 color: var(--ink);
 margin: 0;
 }
-
 /* === FINAL CTA === */
 .final-cta {
 background: var(--ink);
@@ -609,7 +509,6 @@ background: rgba(255,255,255,0.05);
 color: var(--paper);
 border-color: var(--paper);
 }
-
 /* === FOOTER === */
 .proj-footer {
 border-top: 1px solid var(--rule);
@@ -620,7 +519,6 @@ color: var(--muted);
 }
 .proj-footer a { color: var(--teal); text-decoration: none; }
 .proj-footer a:hover { text-decoration: underline; }
-
 /* === REVEAL === */
 .reveal {
 opacity: 0;
@@ -628,7 +526,6 @@ transform: translateY(0.75rem);
 transition: opacity 0.5s cubic-bezier(0.22,1,0.36,1), transform 0.5s cubic-bezier(0.22,1,0.36,1);
 }
 .reveal.visible { opacity: 1; transform: translateY(0); }
-
 /* === RESPONSIVE === */
 @media (max-width: 1024px) {
 .page-width { padding: 0 1.5rem; }
@@ -669,31 +566,87 @@ html { font-size: 15px; }
 .terminal-body { font-size: 0.65rem; padding: 0.8rem; }
 }
 </style>
-</head>
-<body>
-
-<!-- BACK NAV -->
+<script type="application/ld+json">
+{
+"@context": "https://schema.org",
+"@type": "FAQPage",
+"mainEntity": [
+{
+"@type": "Question",
+"name": "What does RSI mean in AI?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "In AI, RSI stands for recursive self-improvement: a system that improves its own ability to improve — rewriting its own logic, tuning its own thresholds, or upgrading the very process it uses to get better. The RSI Loop is a small, inspectable prototype of the gate such a system would need, applied to a detector for the other RSI, repetitive strain injury. In the current version the changes to the detector were made by hand; a follow-up experiment adds the optimiser."
+}
+},
+{
+"@type": "Question",
+"name": "What is recursive self-improvement, in plain terms?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "A normal program is improved by its developers. A recursively self-improving system proposes changes to itself — to its detection logic, thresholds or code — evaluates whether the change made it better, and keeps what works. It is recursive because the thing being improved is also the thing doing the improving, so gains can compound from cycle to cycle."
+}
+},
+{
+"@type": "Question",
+"name": "Is recursive self-improvement dangerous?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "Unbounded self-improvement is a core AI-safety concern: a system optimising itself against a narrow score can drift into behaviour its designers never intended. The RSI Loop sketches one mitigation pattern — a two-stage gate in which a candidate change must pass both an accuracy check and an independent auditor that holds the system inside clinically plausible bounds. Whether that gate holds against an optimiser that can rewrite the detector in full has not been tested in the current version; that is the follow-up experiment."
+}
+},
+{
+"@type": "Question",
+"name": "What is the RSI Loop, concretely?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "A Python prototype (about 1,150 lines) that detects repetitive-strain risk from posture landmarks, plus a two-stage acceptance gate. The v1 to v2 change that lifted benchmark accuracy from 90% to 100% was made by hand, with both thresholds inside gold-standard clinical ranges; there is no optimiser in the current code. A September 2026 audit found that the gate can be rewritten from inside the candidate's process, cannot distinguish a lookup table from a classifier, and cannot see that v2 is sensitive to camera roll."
+}
+},
+{
+"@type": "Question",
+"name": "What does RSI mean in computing?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "It depends on who is talking. In AI research, RSI is recursive self-improvement — a system that helps improve itself. In occupational health, including for anyone who spends the day at a keyboard, RSI is repetitive strain injury, the umbrella term for overuse conditions of the hands, wrists, arms and neck. In trading, RSI is the relative strength index, a momentum indicator with nothing to do with either. This page is about the first two, and the pun is deliberate: a gate for a self-improving detector of repetitive strain injury."
+}
+},
+{
+"@type": "Question",
+"name": "What is RSI in machine learning?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "In machine learning, RSI is recursive self-improvement: a system that takes part in improving itself, rather than being improved only by its developers. Ordinary training improves a model against a fixed objective, under a process the developers control. In recursive self-improvement, the system also modifies the improvement process itself — proposing new logic, tests or thresholds. That autonomy is what makes RSI powerful, and what makes independent verification essential."
+}
+},
+{
+"@type": "Question",
+"name": "How close is AI to RSI?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "Closer than it was, and not there yet, depending on what you count. Narrow forms already exist: systems such as AlphaEvolve and the Darwin Gödel Machine let a model rewrite parts of the code around itself and keep whatever scores better, and frontier labs now use their models to write much of their own research code. What does not yet exist is a system that improves the model itself, end to end, faster than its developers can check the result. In September 2026 OpenAI's chief scientist, Jakub Pachocki, wrote that machine RSI \"will be at the very core of future scientific discovery\" if progress continues, that no lab has yet solved alignment and monitoring well enough to keep scaling at full speed for much longer, and called for shared, externally audited safety bars. That is the frontier-scale version of the question this page asks at toy scale: when a system is allowed to change itself, who checks the change, with what information, and can the check be gamed?"
+}
+}
+]
+}
+</script>
 <nav class="subnav">
 <div class="page-width">
 <a href="/"><span aria-hidden="true">←</span> PharmaTools.AI</a>
 </div>
 </nav>
-
-<!-- HERO -->
 <header class="proj-hero">
 <div class="page-width">
 <span class="proj-kicker">Lab · Experiment</span>
 <h1>The RSI Loop: A Two-Stage Acceptance Gate for a <strong>Self-Modifying</strong> Detector</h1>
 <p class="proj-subtitle">Using RSI to solve RSI: a small, deterministic prototype of a gate that lets a detector change, but only inside a clinical envelope.</p>
 <p class="proj-definition"><strong>RSI, in AI, means recursive self-improvement</strong> — a system that improves its own ability to improve, by rewriting its own logic, tuning its own thresholds or upgrading the process it uses to get better. This page is a small, audited prototype of the gate such a system would need. <a href="#faq">Full definition and FAQ ↓</a></p>
-
 <div class="proj-meta">
 <span class="proj-meta-item">Stack <strong>Python · MediaPipe · rich</strong></span>
 <span class="proj-meta-item">Lines <strong>~1,150</strong></span>
 <span class="proj-meta-item">Status <strong>v2 — gate prototype · audited Sept 2026</strong></span>
 <span class="proj-meta-item">Author <strong>Nick Lamb</strong></span>
 </div>
-
 <div class="proj-ctas">
 <a class="btn-primary" href="https://github.com/nickjlamb/rsi-loop">
 <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.69-.01-1.36-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.81.06 1.23.83 1.23.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.03 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38C13.71 14.53 16 11.54 16 8c0-4.42-3.58-8-8-8z"/></svg>
@@ -707,8 +660,6 @@ Watch the Narrated Demo
 </div>
 </div>
 </header>
-
-<!-- DEMO GIF — placed near hero for narrative weight -->
 <section id="demo">
 <div class="page-width">
 <p class="section-label"><span class="section-num">00</span>Demo</p>
@@ -721,8 +672,6 @@ Watch the Narrated Demo
 </div>
 </div>
 </section>
-
-<!-- 01 — THE PROBLEM -->
 <section>
 <div class="page-width">
 <p class="section-label"><span class="section-num">01</span>The Problem</p>
@@ -734,8 +683,6 @@ Watch the Narrated Demo
 </div>
 </div>
 </section>
-
-<!-- 02 — ARCHITECTURE -->
 <section>
 <div class="page-width">
 <p class="section-label"><span class="section-num">02</span>Architecture</p>
@@ -743,9 +690,7 @@ Watch the Narrated Demo
 <div class="section-body">
 <p>Self-improving systems fail when their objective is too easy to satisfy. The RSI Loop separates "did it work?" (Stage&nbsp;1) from "is the result clinically meaningful?" (Stage&nbsp;2). A candidate detector — today, one I wrote by hand — is accepted as <code>COMPLETE</code> only if it passes <em>both</em> stages.</p>
 <p style="font-size: 0.85rem; color: var(--muted); font-style: italic; padding: 0.6rem 0.9rem; border-left: 2px solid var(--rule); max-width: 60ch; margin-bottom: 1.5rem;">Read top to bottom — each stage produces a verdict and an exit code, and the loop is <code style="font-style: normal;">COMPLETE</code> only if both verdicts are <code style="font-style: normal;">PASS</code>.</p>
-
 <div class="pipeline reveal">
-
 <div class="stage stage-accuracy">
 <span class="stage-tag">Stage 01 · Accuracy</span>
 <h3>Does the detector classify posture correctly?</h3>
@@ -762,9 +707,7 @@ Watch the Narrated Demo
 <span class="fail">if FAIL → exit 1 (NOT_ACCURATE)</span>
 </div>
 </div>
-
 <div class="pipeline-arrow" aria-hidden="true">▼</div>
-
 <div class="stage stage-compliance">
 <span class="stage-tag">Stage 02 · Compliance</span>
 <h3>Are the thresholds clinically plausible?</h3>
@@ -781,24 +724,18 @@ Watch the Narrated Demo
 <span class="fail">if FAIL → exit 2 (NOT_COMPLIANT)</span>
 </div>
 </div>
-
 <div class="pipeline-arrow" aria-hidden="true">▼</div>
-
 <div class="final-status"><strong>RSI LOOP STATUS: COMPLETE</strong> &nbsp;·&nbsp; accurate AND compliant</div>
-
 </div>
 </div>
 </div>
 </section>
-
-<!-- 03 — EVOLUTION LOG -->
 <section>
 <div class="page-width">
 <p class="section-label"><span class="section-num">03</span>Evolution Log</p>
 <h2 class="section-heading">v1 → v2, replayed</h2>
 <div class="section-body">
 <p>The v1 detector used a signed horizontal offset (<code>hand_x − wrist_x &gt; 0.10</code>) — direction-blind, so it caught ulnar deviation but silently missed radial deviation on scenario&nbsp;S06. I replaced both heuristics with proper trigonometric angles between the forearm and metacarpal vectors, and v2 passes. <code>demo.py</code> narrates this change; it does not generate it.</p>
-
 <div class="terminal reveal" role="img" aria-label="Terminal output of demo.py replaying the hand-authored v1 to v2 change.">
 <div class="terminal-bar">
 <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
@@ -807,49 +744,37 @@ Watch the Narrated Demo
 <div class="terminal-body"><span class="term-prompt">$</span> python3 demo.py
 <span class="term-rule">────────────────────────────────────────────────────────────────</span>
 <span class="term-cycle">CYCLE 1 — v1 detector (intentionally flawed)</span>
-
-  S05_severe_ulnar_deviation     <span class="term-pass">PASS</span>
-  <span class="term-em">S06_radial_deviation           <span class="term-fail">FAIL</span>  expected=High Strain  predicted=Safe</span>
-  S07_combined_strain            <span class="term-pass">PASS</span>
-
-  Accuracy <span class="term-fail">90%</span>   Precision 100%   Recall <span class="term-fail">80%</span>   F1 0.89
+S05_severe_ulnar_deviation     <span class="term-pass">PASS</span>
+<span class="term-em">S06_radial_deviation           <span class="term-fail">FAIL</span>  expected=High Strain  predicted=Safe</span>
+S07_combined_strain            <span class="term-pass">PASS</span>
+Accuracy <span class="term-fail">90%</span>   Precision 100%   Recall <span class="term-fail">80%</span>   F1 0.89
 <span class="term-rule">────────────────────────────────────────────────────────────────</span>
 <span class="term-cycle">ANALYSIS &amp; PROPOSED FIX (hand-authored)</span>
-
-  <span class="term-key">Failure</span>:  v1's signed offset (<span class="term-em">hand_x − wrist_x</span>) only fires
-            when displacement is positive. Radial deviation
-            produces a negative offset and is silently ignored.
-
-  <span class="term-key">Fix</span>:      Replace both heuristics with proper trigonometric
-            angles. Forward-head: <span class="term-em">atan2(|dx|, |dy|)</span>. Wrist:
-            angle between forearm vector (elbow→wrist) and
-            metacarpal vector (wrist→hand_center). Both are
-            direction-agnostic — radial AND ulnar are caught.
-
-  <span class="term-key">New thresholds</span>: <span class="term-em">20°</span> head · <span class="term-em">50°</span> wrist
+<span class="term-key">Failure</span>:  v1's signed offset (<span class="term-em">hand_x − wrist_x</span>) only fires
+when displacement is positive. Radial deviation
+produces a negative offset and is silently ignored.
+<span class="term-key">Fix</span>:      Replace both heuristics with proper trigonometric
+angles. Forward-head: <span class="term-em">atan2(|dx|, |dy|)</span>. Wrist:
+angle between forearm vector (elbow→wrist) and
+metacarpal vector (wrist→hand_center). Both are
+direction-agnostic — radial AND ulnar are caught.
+<span class="term-key">New thresholds</span>: <span class="term-em">20°</span> head · <span class="term-em">50°</span> wrist
 <span class="term-rule">────────────────────────────────────────────────────────────────</span>
 <span class="term-cycle">CYCLE 2 — v2 detector (corrected)</span>
-
-  S05_severe_ulnar_deviation     <span class="term-pass">PASS</span>   wrist=68.7°
-  S06_radial_deviation           <span class="term-pass">PASS</span>   wrist=136.5°
-  S07_combined_strain            <span class="term-pass">PASS</span>   wrist=67.5°
-
-  Accuracy <span class="term-pass">100%</span>  Precision 100%   Recall <span class="term-pass">100%</span>  F1 1.00
+S05_severe_ulnar_deviation     <span class="term-pass">PASS</span>   wrist=68.7°
+S06_radial_deviation           <span class="term-pass">PASS</span>   wrist=136.5°
+S07_combined_strain            <span class="term-pass">PASS</span>   wrist=67.5°
+Accuracy <span class="term-pass">100%</span>  Precision 100%   Recall <span class="term-pass">100%</span>  F1 1.00
 <span class="term-rule">────────────────────────────────────────────────────────────────</span>
 <span class="term-cycle">STAGE 2 — Regulatory Audit</span>
-
-  Forward Head Threshold     20.00°  ∈ [15.0, 25.0]   <span class="term-pass">PASS</span>
-  Wrist Deviation Threshold  50.00°  ∈ [40.0, 60.0]   <span class="term-pass">PASS</span>
-
-  Overall Compliance: <span class="term-pass">PASS</span>
+Forward Head Threshold     20.00°  ∈ [15.0, 25.0]   <span class="term-pass">PASS</span>
+Wrist Deviation Threshold  50.00°  ∈ [40.0, 60.0]   <span class="term-pass">PASS</span>
+Overall Compliance: <span class="term-pass">PASS</span>
 <span class="term-rule">────────────────────────────────────────────────────────────────</span>
 <span class="term-em">RSI LOOP STATUS:</span> <span class="term-complete">COMPLETE</span>  <span class="term-dim">— accurate AND compliant</span></div>
 </div>
-
 <p style="margin-top: 1.2rem;">The gate does catch the attack it was designed for: drift the wrist threshold to <code>67°</code> and Stage 1 still passes 100%, but Stage 2 returns <code>HARD FAILURE</code> (7° beyond the clinical max) and the candidate is rejected.</p>
-
 <p>It also has holes, found in a September 2026 audit and each reproduced against an untouched copy of the code:</p>
-
 <div class="next-grid reveal">
 <div class="next-card">
 <h4>Same-process tampering</h4>
@@ -871,15 +796,12 @@ Watch the Narrated Demo
 </div>
 </div>
 </section>
-
-<!-- 04 — PHARMA ANGLE -->
 <section>
 <div class="page-width">
 <p class="section-label"><span class="section-num">04</span>The Pharma Angle</p>
 <h2 class="section-heading">GxP-Ready Agentic Design</h2>
 <div class="section-body">
 <p>Pharma teams already have a name for "let the system improve, but only inside an immutable spec": <strong>Computer System Validation (CSV)</strong>. The RSI Loop's two-stage pipeline maps cleanly onto CSV's separation between <em>functional</em> qualification (does the system do what it claims?) and <em>performance</em> qualification (does it stay inside its validated envelope under change?).</p>
-
 <table class="gxp-table reveal">
 <thead>
 <tr>
@@ -914,20 +836,16 @@ Watch the Narrated Demo
 </tr>
 </tbody>
 </table>
-
 <p>The takeaway for pharma audiences: <strong>an acceptance gate with an external, immutable spec is a pattern regulated environments already understand.</strong> The RSI Loop is a 1,150-line sketch of that shape, in a domain (ergonomics) that's friendly enough to host it without regulatory entanglement. Whether the shape holds against a real optimiser — one that can rewrite the detector in full and is under pressure to score well — is exactly what the follow-up experiment tests.</p>
 </div>
 </div>
 </section>
-
-<!-- 05 — LIMITATIONS / ROADMAP -->
 <section>
 <div class="page-width">
 <p class="section-label"><span class="section-num">05</span>Limitations &amp; Roadmap</p>
 <h2 class="section-heading">What this prototype is — and isn't</h2>
 <div class="section-body">
 <p>This is a deliberately small, deliberately observable prototype. The point is the <em>shape of the gate</em>, not the model. Honest about what it is and isn't:</p>
-
 <div class="next-grid reveal">
 <div class="next-card">
 <h4>Today</h4>
@@ -949,8 +867,6 @@ Watch the Narrated Demo
 </div>
 </div>
 </section>
-
-<!-- 06 — FAQ -->
 <section id="faq">
 <div class="page-width">
 <p class="section-label"><span class="section-num">06</span>FAQ</p>
@@ -958,7 +874,6 @@ Watch the Narrated Demo
 <div class="section-body">
 <p>In AI, <strong>RSI stands for recursive self-improvement</strong>: a system that improves its own ability to improve — rewriting its own logic, tuning its own thresholds, or upgrading the very process it uses to get better. Each cycle compounds on the last, which is why RSI sits at the centre of debates about accelerating AI capability and how to keep it under meaningful oversight.</p>
 <p>This page is a small, inspectable prototype of the <em>gate</em> such a system would need — applied to a detector that targets the other RSI, repetitive strain injury. In this version the changes to the detector were made by hand; the follow-up experiment described above adds the optimiser.</p>
-
 <div class="faq reveal">
 <div class="faq-item">
 <h3>What is recursive self-improvement, in plain terms?</h3>
@@ -988,8 +903,6 @@ Watch the Narrated Demo
 </div>
 </div>
 </section>
-
-<!-- FINAL CTA -->
 <section class="final-cta">
 <div class="page-width final-cta-inner">
 <h2>Read the code, then read the audit.</h2>
@@ -1007,14 +920,11 @@ Watch the Narrated Demo
 </div>
 </div>
 </section>
-
-<!-- FOOTER -->
 <footer class="proj-footer">
 <div class="page-width">
 Part of the <a href="/">PharmaTools.AI</a> Labs collection — experimental systems, not commercial products. Built by <a href="/">Nick Lamb</a>, 2026.
 </div>
 </footer>
-
 <script>
 // Scroll reveal — same pattern as the homepage
 (function() {
@@ -1030,6 +940,3 @@ obs.unobserve(e.target);
 els.forEach(el => obs.observe(el));
 })();
 </script>
-
-</body>
-</html>
