@@ -1,3 +1,5 @@
+# Legacy demo (legacy/) needs mediapipe + opencv only for the optional webcam path; rich for the narrated output.
+# The RSI Loop 2 harness (env/, policy/, evaluator/, tests/) needs only the standard library and pytest.
 mediapipe>=0.10
 opencv-python>=4.8
 rich>=13.0

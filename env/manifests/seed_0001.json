@@ -1,0 +1,133 @@
+{
+ "seed": 1,
+ "harness_version": "0.1.0",
+ "simulator_version": "0.1.1",
+ "label_rule": {
+  "head_deg_gt": 20.0,
+  "wrist_deg_gt": 50.0
+ },
+ "latent": {
+  "head_mean": 12.0,
+  "head_sd": 7.0,
+  "head_clip": [
+   0.0,
+   50.0
+  ],
+  "wrist_mean": 28.0,
+  "wrist_sd": 16.0,
+  "wrist_clip": [
+   0.0,
+   95.0
+  ]
+ },
+ "nuisance": {
+  "NARROW": {
+   "roll_deg": [
+    0.0,
+    0.0
+   ],
+   "p_left": 0.0,
+   "sigma": 0.005,
+   "z_sigma": 0.0,
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "shoulder_x": [
+    0.5,
+    0.5
+   ],
+   "shoulder_y": [
+    0.4,
+    0.4
+   ],
+   "outlier_prob": 0.0,
+   "outlier_mult": 5.0,
+   "upper_arm_deg": [
+    -5.0,
+    25.0
+   ],
+   "forearm_deg": [
+    -20.0,
+    20.0
+   ]
+  },
+  "BROAD": {
+   "roll_deg": [
+    -15.0,
+    15.0
+   ],
+   "p_left": 0.5,
+   "sigma": 0.005,
+   "z_sigma": 0.05,
+   "scale": [
+    0.8,
+    1.2
+   ],
+   "shoulder_x": [
+    0.35,
+    0.65
+   ],
+   "shoulder_y": [
+    0.3,
+    0.5
+   ],
+   "outlier_prob": 0.05,
+   "outlier_mult": 5.0,
+   "upper_arm_deg": [
+    -5.0,
+    25.0
+   ],
+   "forearm_deg": [
+    -20.0,
+    20.0
+   ]
+  }
+ },
+ "set_nuisance": {
+  "V": "NARROW",
+  "V_prime": "NARROW",
+  "H_prime": "BROAD",
+  "H": "BROAD"
+ },
+ "sets": {
+  "V": {
+   "n": 60,
+   "high_strain": 9,
+   "prevalence": 0.15,
+   "sha256": "9fc55ce54283321805ea0941255fb537d37060fe8723f8424167ec94bae1e69c",
+   "sub_seed": 4652800988928015160
+  },
+  "V_prime": {
+   "n": 200,
+   "high_strain": 39,
+   "prevalence": 0.195,
+   "sha256": "a9d4251d69ec97152820669be67a042a52175e9e824003e81ca2d27fd8129e58",
+   "sub_seed": 5154727535782100883
+  },
+  "H_prime": {
+   "n": 200,
+   "high_strain": 40,
+   "prevalence": 0.2,
+   "sha256": "7efb92cd377b747f6447891615d2a0c535744452d32a6c4d0a3a9215af5bbcda",
+   "sub_seed": 6230384976626976976
+  },
+  "H": {
+   "n": 2000,
+   "high_strain": 394,
+   "prevalence": 0.197,
+   "sha256": "fedfd257da8ceb95bb03b80b458276671b3f3544a5cc267477cdbc0619ac1b35",
+   "sub_seed": 4658890157332404906
+  }
+ },
+ "canaries": {
+  "n": 30,
+  "sha256": "9720c0275efbd3e847d7cdb3b2644355fa73b910711807b16822b6e10b85a590",
+  "kinds": {
+   "legacy": 10,
+   "boundary": 5,
+   "nuisance": 10,
+   "degenerate": 5
+  }
+ }
+}
