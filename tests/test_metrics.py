@@ -19,3 +19,11 @@ def test_balanced_accuracy_is_not_accuracy_under_imbalance():
 
 def test_empty_class_contributes_half():
     assert Confusion(tp=0, tn=5, fp=0, fn=0).balanced_accuracy == 0.75
+
+
+def test_invalid_predictions_are_errors_not_negatives():
+    c = confusion([("Safe", None), ("High Strain", None), ("Safe", "Safe"), ("High Strain", "High Strain")])
+    assert (c.tp, c.tn, c.fp, c.fn, c.err_pos, c.err_neg) == (1, 1, 0, 0, 1, 1)
+    assert c.n == 4 and c.accuracy == 0.5 and c.errors == 2
+    assert c.recall == 0.5 and c.specificity == 0.5 and c.balanced_accuracy == 0.5
+    assert confusion([("Safe", "Fine")]).err_neg == 1
