@@ -1,46 +1,30 @@
-# The RSI Loop — from a verification demo to a Goodhart testbed
+> **Historical demo (frozen).** This directory holds the original RSI Loop exactly as audited in September 2026 — the gate prototype, its ten hand-authored benchmarks and the narrated v1 → v2 replay. It is kept unchanged as the generation-0 policy's origin and the canary set for the follow-up experiment being built in the repository root. Run it from this directory: `cd legacy && python3 demo.py`.
+
+# The RSI Loop — A Two-Stage Acceptance Gate for a Posture-Risk Detector
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+![Python](https://img.shields.io/badge/python-3.x-blue.svg)
 
-**Status (September 2026): being rebuilt as an experiment.** The original RSI Loop — a two-stage acceptance gate around a hand-written posture-risk detector — was audited in September 2026 and found to contain a gate but no optimiser, no hidden evaluation and no process boundary between the candidate and its verifier (see [Known limitations](#known-limitations)). The repository is now being converted, milestone by milestone, into the preregistered follow-up experiment designed in [`docs/rsi-loop-2-research-design.md`](docs/rsi-loop-2-research-design.md): an LLM optimiser rewrites the detector under four verification architectures while a seeded simulator holds the hidden ground truth.
+**The RSI Loop** is a small, deterministic proof-of-concept: a geometric detector for Repetitive Strain Injury risk (forward-head posture and wrist deviation from MediaPipe-style landmarks), wrapped in a two-stage acceptance gate. Stage 1 checks accuracy against a labelled benchmark; Stage 2 checks that the detector's thresholds sit inside published clinical ranges. A candidate detector is accepted only if it passes both.
 
-| Milestone | Status |
-| --- | --- |
-| M0 — freeze the legacy demo in `legacy/` | done |
-| M1 — seeded simulator and datasets (`env/`) | done — see [`env/README.md`](env/README.md) |
-| M2 — process-isolated sandbox | not started |
-| M3 — evaluators and gates | not started |
-| M4–M6 — optimiser, loop, monitor and analysis | not started |
-| M7–M10 — pilot, freeze, confirmatory run, write-up | not started |
-
-**The original demo is unchanged and still runs** — from the `legacy/` directory, whose [README](legacy/README.md) is the historical write-up:
-
-```bash
-python3 -m pip install -r requirements.txt
-cd legacy && python3 demo.py
-```
-
-Everything below this line describes that original demo and its audit. It is kept here, unedited apart from paths, because the audit is the reason the experiment exists.
+The name is a pun — RSI is both Repetitive Strain Injury and Recursive Self-Improvement — and the gate was designed with self-improving systems in mind. But be clear about what this repository contains: **there is no optimiser in it.** The v1 → v2 change that `demo.py` replays was written by hand. What the code demonstrates is the *gate*, not a system that improves itself. A follow-up experiment that adds a real LLM optimiser, a hidden evaluation distribution and a process-isolated verifier is designed in [`docs/rsi-loop-2-research-design.md`](../docs/rsi-loop-2-research-design.md); an audit of this version's limitations is in the [Known limitations](#known-limitations) section below.
 
 > Built for the [pharmatools.ai](https://pharmatools.ai) portfolio.
-
 
 ---
 
 ## Demo
 
-![The RSI Loop demo — v1 fails on a radial-deviation case, the hand-authored v2 fix passes, the auditor signs off, and the final status is COMPLETE.](demo.gif)
+![The RSI Loop demo — v1 fails on a radial-deviation case, the hand-authored v2 fix passes, the auditor signs off, and the final status is COMPLETE.](../demo.gif)
 
-The recording is the output of [`demo.py`](legacy/demo.py): cycle 1 (the original, flawed v1 detector → 90 % accuracy), a narrative panel explaining the fix, cycle 2 (the corrected v2 → 100 %), and the Stage 2 audit. The "self-improvement" panel is a description of a change I made, not the output of an optimiser. A higher-fidelity recording is committed as [`demo.cast`](legacy/demo.cast) — play it with `asciinema play demo.cast`.
+The recording is the output of [`demo.py`](demo.py): cycle 1 (the original, flawed v1 detector → 90 % accuracy), a narrative panel explaining the fix, cycle 2 (the corrected v2 → 100 %), and the Stage 2 audit. The "self-improvement" panel is a description of a change I made, not the output of an optimiser. A higher-fidelity recording is committed as [`demo.cast`](demo.cast) — play it with `asciinema play demo.cast`.
 
 ---
 
 ## Quick start
 
 ```bash
-python3 -m pip install -r requirements.txt
-cd legacy
+python3 -m pip install -r ../requirements.txt
 python3 demo.py            # narrated v1 → v2 walkthrough + final audit (start here)
 python3 test_engine.py     # unnarrated run, machine-readable output
 python3 auditor.py         # Stage-2 audit only
@@ -59,8 +43,8 @@ The RSI Loop sketches one answer: a two-stage gate in which passing the benchmar
 ## Two-Stage Validation
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/architecture-dark.svg">
-  <img src="docs/architecture-light.svg" alt="The RSI Loop gate: a candidate detector is checked for accuracy against labelled benchmarks (below 90% the audit never runs), then its thresholds are audited against the Clinical Gold Standard — in range is accepted as COMPLETE, outside is rejected as NOT_COMPLIANT. Passing the test is necessary but not sufficient." width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="../docs/architecture-dark.svg">
+  <img src="../docs/architecture-light.svg" alt="The RSI Loop gate: a candidate detector is checked for accuracy against labelled benchmarks (below 90% the audit never runs), then its thresholds are audited against the Clinical Gold Standard — in range is accepted as COMPLETE, outside is rejected as NOT_COMPLIANT. Passing the test is necessary but not sufficient." width="100%">
 </picture>
 
 ### Stage 1 — Accuracy (Benchmarks)
@@ -122,8 +106,6 @@ None of these is fixed in this repository; fixing them properly is the follow-up
 
 ## Architecture
 
-All of these now live in `legacy/`.
-
 | File | Role |
 | --- | --- |
 | `detector.py` | Pure geometric classifier. Forward-head and wrist-deviation angles, with two tunable thresholds. Optional MediaPipe webcam pipeline (lazy-imported). |
@@ -161,8 +143,8 @@ v1 missed the radial-deviation scenario `S06` because its wrist check inspected 
 ## Running against a real webcam
 
 ```bash
-python3 -m pip install -r requirements.txt
-cd legacy && python3 -c "from detector import assess_from_webcam; print(assess_from_webcam())"
+python3 -m pip install -r ../requirements.txt
+python3 -c "from detector import assess_from_webcam; print(assess_from_webcam())"
 ```
 
 The webcam pipeline is gated behind a lazy import, so the rest of the project runs without `mediapipe` or `opencv-python` installed. Note limitation 4 above: the current geometry assumes an un-rolled camera.

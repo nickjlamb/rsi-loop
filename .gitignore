@@ -4,14 +4,16 @@ __pycache__/
 *$py.class
 *.so
 
-# Virtual environments
+# Virtual environments (note: env/ is the simulator package, not a venv)
 venv/
 .venv/
-env/
 .env
 
 # RSI Loop runtime artefacts
 last_run.json
+
+# Generated datasets (regenerable from seed + manifest; committed at freeze)
+/data/
 
 # OS
 .DS_Store
