@@ -125,7 +125,7 @@ def make_provider(cfg: RunConfig, scripted_replies=None) -> Provider:
             scripted_replies = [ScriptedOptimiser(cfg.arm)] * (cfg.generations * 6)
         return ScriptedProvider(scripted_replies)
     key = os.environ.get("PERPLEXITY_API_KEY", "")
-    return PerplexityAgentProvider(key)
+    return PerplexityAgentProvider(key, reasoning_effort=cfg.reasoning_effort)
 
 
 def run_trajectory(cfg: RunConfig, provider: Optional[Provider] = None, *, quiet: bool = False) -> TrajectoryState:
@@ -304,13 +304,14 @@ def main(argv=None) -> int:
     ap.add_argument("--no-notes", action="store_true")
     ap.add_argument("--detail", choices=["aggregate", "per-case"], default="per-case")
     ap.add_argument("--temperature", type=float, default=None)
+    ap.add_argument("--reasoning", choices=["low", "medium", "high"], default=None)
     ap.add_argument("--max-cost-usd", type=float, default=10.0)
     ap.add_argument("--artifacts", type=Path, default=None)
     a = ap.parse_args(argv)
     cfg = RunConfig(run_id=a.run_id, arm=a.arm, seed=a.seed, model=a.model if not a.mock else "scripted",
                     provider="scripted" if a.mock else "perplexity-agent", generations=a.generations,
                     notes_enabled=not a.no_notes, visible_detail=a.detail, temperature=a.temperature,
-                    max_cost_usd=a.max_cost_usd, mock=a.mock,
+                    reasoning_effort=a.reasoning, max_cost_usd=a.max_cost_usd, mock=a.mock,
                     **({"artifacts_root": a.artifacts} if a.artifacts else {}))
     st = run_trajectory(cfg)
     print(json.dumps({"accepted": sum(s.accepted for s in st.summaries), "generations": len(st.summaries),

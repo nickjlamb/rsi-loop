@@ -24,7 +24,8 @@ class RunConfig:
     visible_detail: str = "per-case"            # design D.3 switch VISIBLE_DETAIL
     eval_source_visible: bool = True            # design D.3 switch EVAL_SOURCE_VISIBLE
     max_local_evals: int = 4
-    max_output_tokens: int = 16000              # raised from 8000 after pilot gen 2 returned an empty reply at the cap
+    max_output_tokens: int = 32000              # reasoning tokens count against this; Sonnet 5 uses 12-16k per reply (pilot-02)
+    reasoning_effort: Optional[str] = None       # None = API default; "low"/"medium"/"high" if ever set, recorded per trajectory
     temperature: Optional[float] = None         # None = provider default (Agent API default is 1)
     max_cost_usd: float = 10.0                  # per-trajectory guard; halts with a recorded reason
     artifacts_root: Path = ARTIFACTS_ROOT

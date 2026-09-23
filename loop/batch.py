@@ -78,11 +78,13 @@ def main(argv=None) -> int:
     ap.add_argument("--generations", type=int, default=20)
     ap.add_argument("--no-notes", action="store_true")
     ap.add_argument("--max-cost-usd", type=float, default=10.0)
+    ap.add_argument("--reasoning", choices=["low", "medium", "high"], default=None)
     a = ap.parse_args(argv)
     pairs = plan(a.arms, a.seeds, a.shuffle)
     print("[batch] order:", " ".join(f"{x}/{s}" for x, s in pairs))
     log = run_batch(a.run_id, pairs, model=a.model if not a.mock else "scripted", attempts=a.attempts, pause_s=a.pause,
-                    mock=a.mock, generations=a.generations, notes_enabled=not a.no_notes, max_cost_usd=a.max_cost_usd)
+                    mock=a.mock, generations=a.generations, notes_enabled=not a.no_notes, max_cost_usd=a.max_cost_usd,
+                    reasoning_effort=a.reasoning)
     total = sum(e["cost_usd"] for e in log)
     print(json.dumps({"trajectories": len(pairs), "attempts_logged": len(log), "total_cost_usd_this_log": round(total, 2)}))
     return 0

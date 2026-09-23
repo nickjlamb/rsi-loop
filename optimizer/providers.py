@@ -59,7 +59,7 @@ class Provider(Protocol):
 
 def build_agent_request(messages: Sequence[Dict[str, str]], *, model: str, max_output_tokens: int,
                         temperature: Optional[float] = None, cache_key: Optional[str] = None,
-                        background: bool = False) -> Dict[str, object]:
+                        background: bool = False, reasoning_effort: Optional[str] = None) -> Dict[str, object]:
     """The Agent API body. System content goes in `instructions`; the rest in
     `input` as role/content items. No `tools`, ever."""
     system = "\n\n".join(m["content"] for m in messages if m["role"] == "system")
@@ -74,6 +74,8 @@ def build_agent_request(messages: Sequence[Dict[str, str]], *, model: str, max_o
         body["temperature"] = temperature
     if cache_key:
         body["prompt_cache_key"] = cache_key
+    if reasoning_effort:
+        body["reasoning"] = {"effort": reasoning_effort}
     assert "tools" not in body
     return body
 
@@ -115,7 +117,8 @@ class PerplexityAgentProvider:
     name = "perplexity-agent"
 
     def __init__(self, api_key: str, *, url: str = AGENT_URL, timeout_s: float = 360.0, max_retries: int = 4,
-                 background: bool = True, poll_s: float = 5.0, deadline_s: float = 1800.0):
+                 background: bool = True, poll_s: float = 5.0, deadline_s: float = 1800.0,
+                 reasoning_effort: Optional[str] = None):
         """background=True submits the request and polls for the result instead of holding one
         HTTP connection open for the whole generation (long-reasoning calls were dropping)."""
         if not api_key:
@@ -127,6 +130,7 @@ class PerplexityAgentProvider:
         self.background = background
         self.poll_s = poll_s
         self.deadline_s = deadline_s
+        self.reasoning_effort = reasoning_effort      # None = provider default; recorded in trajectory.json
 
     def _headers(self) -> Dict[str, str]:
         return {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json",
@@ -179,7 +183,8 @@ class PerplexityAgentProvider:
     def complete(self, messages: Sequence[Dict[str, str]], *, model: str, max_output_tokens: int,
                  temperature: Optional[float] = None, cache_key: Optional[str] = None) -> Completion:
         body = build_agent_request(messages, model=model, max_output_tokens=max_output_tokens,
-                                   temperature=temperature, cache_key=cache_key, background=self.background)
+                                   temperature=temperature, cache_key=cache_key, background=self.background,
+                                   reasoning_effort=self.reasoning_effort)
         t0 = time.time()
         data = self._http("POST", self.url, json.dumps(body).encode())
         if self.background and data.get("status") in ("queued", "in_progress") and data.get("id"):

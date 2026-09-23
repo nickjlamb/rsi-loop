@@ -267,3 +267,9 @@ def test_background_poll_falls_back_to_responses_path(monkeypatch):
 
     monkeypatch.setattr(p, "_http", fake_http)
     assert p.complete([{"role": "user", "content": "x"}], model="m", max_output_tokens=10).text == "ok"
+
+
+def test_reasoning_effort_is_sent_only_when_set():
+    assert "reasoning" not in build_agent_request([{"role": "user", "content": "x"}], model="m", max_output_tokens=10)
+    b = build_agent_request([{"role": "user", "content": "x"}], model="m", max_output_tokens=10, reasoning_effort="medium")
+    assert b["reasoning"] == {"effort": "medium"}
