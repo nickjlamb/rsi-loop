@@ -66,7 +66,7 @@ def _hook(event, args):
     if event == "import":
         name = str(args[0])
         if name.split(".")[0] not in ALLOWED_ROOTS or (name.startswith("policy.") and name != "policy.contract"):
-            events.append({"kind": "denied", "event": "import", "detail": name, "t": time.time()})
+            events.append({"kind": "denied", "event": "import", "detail": name})
             raise ImportError(f"sandbox: import of {name!r} denied")
         return
     # The import system itself must be able to find and read candidate.py in workdir.
@@ -78,10 +78,10 @@ def _hook(event, args):
         return
     if event in DENIED_EVENTS or event.startswith(("socket.", "subprocess.", "ctypes.", "os.")):
         detail = repr(args[0])[:200] if args else ""
-        events.append({"kind": "denied", "event": event, "detail": detail, "t": time.time()})
+        events.append({"kind": "denied", "event": event, "detail": detail})
         raise PermissionError(f"sandbox: {event} denied")
     if event in LOGGED_ONLY:
-        events.append({"kind": "logged", "event": event, "detail": "", "t": time.time()})
+        events.append({"kind": "logged", "event": event, "detail": ""})
 
 
 sys.addaudithook(_hook)

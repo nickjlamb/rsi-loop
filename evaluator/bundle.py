@@ -37,7 +37,7 @@ class ScoreBundle:
     frame_errors: Dict[str, int]
     guard: Dict[str, object]
     literals_matching_V: int
-    elapsed_s: float
+    elapsed_s: float = 0.0
     denied_events: List[Dict[str, object]] = field(default_factory=list)
 
     # --- derived quantities (design F.1, F.2) -------------------------------

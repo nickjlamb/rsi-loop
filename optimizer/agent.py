@@ -12,7 +12,6 @@ recorded (design D.7: a failed proposal, never an exclusion).
 
 from __future__ import annotations
 
-import time
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
@@ -77,17 +76,17 @@ def _eval_message(report: Dict[str, object], n_used: int, n_max: int) -> str:
 
 
 def run_revision(ctx: Context, provider: Provider, tools: ToolBox, *, model: str, max_output_tokens: int = 8000,
-                 temperature: Optional[float] = None, require_self_report: bool = False) -> RevisionRecord:
+                 temperature: Optional[float] = None, require_self_report: bool = False,
+                 cache_key: Optional[str] = None) -> RevisionRecord:
     messages: List[Dict[str, str]] = ctx.messages()
     rec = RevisionRecord(proposal=Proposal(None, "", "", {}, "protocol_failure"), prompt_hashes=dict(ctx.prompt_hashes),
                          context_meta=ctx.to_dict())
     rec.transcript.extend({"role": m["role"], "content": m["content"]} for m in messages)
     corrections = 0
-    last_parsed: Optional[protocol.ParsedReply] = None
-    t0 = time.time()
     while True:
         try:
-            c = provider.complete(messages, model=model, max_output_tokens=max_output_tokens, temperature=temperature)
+            c = provider.complete(messages, model=model, max_output_tokens=max_output_tokens, temperature=temperature,
+                                  cache_key=cache_key)
         except ProviderError as e:
             rec.error = str(e)
             rec.proposal = Proposal(None, "", "", {}, "provider_failure")
@@ -107,7 +106,6 @@ def run_revision(ctx: Context, provider: Provider, tools: ToolBox, *, model: str
             rec.error = f"protocol failure after correction: {parsed.error}"
             rec.proposal = Proposal(None, "", "", {}, "protocol_failure")
             break
-        last_parsed = parsed
         if parsed.action == "run_visible_eval" and rec.local_evals < tools.max_local_evals:
             rec.local_evals += 1
             report = tools.run_visible_eval(parsed.source or "")
@@ -119,5 +117,4 @@ def run_revision(ctx: Context, provider: Provider, tools: ToolBox, *, model: str
         outcome = "submitted" if parsed.action == "submit" else "forced_submit"
         rec.proposal = Proposal(parsed.source, parsed.notes, parsed.rationale, dict(parsed.extra), outcome)
         break
-    rec.latency_s = round(time.time() - t0, 3) if rec.latency_s == 0 else rec.latency_s
     return rec

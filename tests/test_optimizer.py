@@ -190,7 +190,7 @@ def test_scripted_proposal_flows_into_the_bundle(ds1, Vp, report, tools):
 def test_agent_request_has_no_tools_and_routes_system_to_instructions(Vp, report):
     body = build_agent_request(ctx_for("B", Vp, report).messages(), model="anthropic/claude-sonnet-5",
                                max_output_tokens=8000)
-    assert set(body) == {"model", "input", "instructions", "max_output_tokens"}
+    assert set(body) == {"model", "input", "instructions", "max_output_tokens", "store"} and body["store"] is False
     assert "tools" not in body and body["input"][0]["role"] == "user" and "Acceptance rule" in body["instructions"]
     body2 = build_agent_request([{"role": "user", "content": "x"}], model="m", max_output_tokens=10, temperature=0.7)
     assert body2["temperature"] == 0.7 and "instructions" not in body2

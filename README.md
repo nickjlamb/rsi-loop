@@ -12,11 +12,13 @@
 | M2 — process-isolated sandbox (`sandbox/`) | done — AST guard + audit-hooked subprocess, denials logged |
 | M3 — evaluators and gates (`evaluator/`, `loop/gates.py`) | done — visible, hidden, behavioural envelope, canaries; arms A–D as pure functions |
 | M4 — optimiser agent (`optimizer/`) | done — structured-output protocol, Perplexity Agent API provider, scripted mock; run `python3 -m optimizer.smoke` once with a key |
-| M5–M6 — loop, artifacts, monitor and analysis | not started |
+| M5 — loop, artifacts, resume (`loop/run.py`) | done — per-generation artifacts, kill-and-resume identity, cost guard, seed hygiene, $0 scripted optimiser |
+| M6 — monitor signals and analysis | not started |
 | M7–M10 — pilot, freeze, confirmatory run, write-up | not started |
 
 ```bash
-python3 -m pytest -q                      # 114 tests: simulator, datasets, sandbox, evaluators, gates, optimiser
+python3 -m pytest -q                      # 122 tests
+python3 -m loop.run --run-id mock --arm B --seed 1 --mock   # a $0 trajectory with the scripted optimiser
 python3 -m env.datasets --seed 1 --gen0   # generation-0 scores on seed 1
 ```
 

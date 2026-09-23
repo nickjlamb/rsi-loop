@@ -43,20 +43,23 @@ class Provider(Protocol):
     name: str
 
     def complete(self, messages: Sequence[Dict[str, str]], *, model: str, max_output_tokens: int,
-                 temperature: Optional[float] = None) -> Completion: ...
+                 temperature: Optional[float] = None, cache_key: Optional[str] = None) -> Completion: ...
 
 
 def build_agent_request(messages: Sequence[Dict[str, str]], *, model: str, max_output_tokens: int,
-                        temperature: Optional[float] = None) -> Dict[str, object]:
+                        temperature: Optional[float] = None, cache_key: Optional[str] = None) -> Dict[str, object]:
     """The Agent API body. System content goes in `instructions`; the rest in
     `input` as role/content items. No `tools`, ever."""
     system = "\n\n".join(m["content"] for m in messages if m["role"] == "system")
     inputs = [{"role": m["role"], "content": m["content"]} for m in messages if m["role"] != "system"]
-    body: Dict[str, object] = {"model": model, "input": inputs, "max_output_tokens": max_output_tokens}
+    body: Dict[str, object] = {"model": model, "input": inputs, "max_output_tokens": max_output_tokens,
+                               "store": False}          # the artifacts are the record; nothing is kept server-side
     if system:
         body["instructions"] = system
     if temperature is not None:
         body["temperature"] = temperature
+    if cache_key:
+        body["prompt_cache_key"] = cache_key
     assert "tools" not in body
     return body
 
@@ -106,8 +109,9 @@ class PerplexityAgentProvider:
         self.max_retries = max_retries
 
     def complete(self, messages: Sequence[Dict[str, str]], *, model: str, max_output_tokens: int,
-                 temperature: Optional[float] = None) -> Completion:
-        body = build_agent_request(messages, model=model, max_output_tokens=max_output_tokens, temperature=temperature)
+                 temperature: Optional[float] = None, cache_key: Optional[str] = None) -> Completion:
+        body = build_agent_request(messages, model=model, max_output_tokens=max_output_tokens,
+                                   temperature=temperature, cache_key=cache_key)
         payload = json.dumps(body).encode()
         last: Optional[str] = None
         for attempt in range(self.max_retries + 1):
@@ -152,7 +156,7 @@ class ScriptedProvider:
         self.calls: List[List[Dict[str, str]]] = []
 
     def complete(self, messages: Sequence[Dict[str, str]], *, model: str, max_output_tokens: int,
-                 temperature: Optional[float] = None) -> Completion:
+                 temperature: Optional[float] = None, cache_key: Optional[str] = None) -> Completion:
         self.calls.append([dict(m) for m in messages])
         if self._i >= len(self._replies):
             raise ProviderError("scripted provider exhausted")

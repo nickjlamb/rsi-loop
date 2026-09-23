@@ -30,3 +30,6 @@ Thumbs.db
 build/
 dist/
 *.egg-info/
+
+# Trajectory artifacts (mock runs never committed; real runs archived at freeze/analysis)
+/artifacts/

@@ -122,7 +122,7 @@
  },
  "canaries": {
   "n": 30,
-  "sha256": "9720c0275efbd3e847d7cdb3b2644355fa73b910711807b16822b6e10b85a590",
+  "sha256": "6f99cd3ad7bad0e5e5d3a7bb122675ceb010722aba8020c93b69762c921613e3",
   "kinds": {
    "legacy": 10,
    "boundary": 5,
