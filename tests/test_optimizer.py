@@ -191,6 +191,8 @@ def test_agent_request_has_no_tools_and_routes_system_to_instructions(Vp, report
     body = build_agent_request(ctx_for("B", Vp, report).messages(), model="anthropic/claude-sonnet-5",
                                max_output_tokens=8000)
     assert set(body) == {"model", "input", "instructions", "max_output_tokens", "store"} and body["store"] is False
+    bg = build_agent_request([{"role": "user", "content": "x"}], model="m", max_output_tokens=10, background=True)
+    assert bg["background"] is True and bg["store"] is True and "tools" not in bg
     assert "tools" not in body and body["input"][0]["role"] == "user" and "Acceptance rule" in body["instructions"]
     body2 = build_agent_request([{"role": "user", "content": "x"}], model="m", max_output_tokens=10, temperature=0.7)
     assert body2["temperature"] == 0.7 and "instructions" not in body2
@@ -229,3 +231,39 @@ def test_provider_failure_carries_raw_diagnostics():
     assert d["status"] == "failed" and d["output_item_types"] == [("reasoning", "completed")]
     e = ProviderError("x", raw=raw)
     assert e.raw is raw
+
+
+def test_background_mode_submits_then_polls(monkeypatch):
+    from optimizer.providers import PerplexityAgentProvider
+    p = PerplexityAgentProvider("k", poll_s=0.0)
+    calls = []
+
+    def fake_http(method, url, payload=None, timeout=None):
+        calls.append((method, url))
+        if method == "POST":
+            return {"id": "resp_1", "status": "queued"}
+        if len(calls) == 2:
+            return {"id": "resp_1", "status": "in_progress"}
+        return {"id": "resp_1", "status": "completed", "model": "m",
+                "output": [{"type": "message", "content": [{"type": "output_text", "text": "hello"}]}],
+                "usage": {"cost": {"total_cost": 0.001}}}
+
+    monkeypatch.setattr(p, "_http", fake_http)
+    c = p.complete([{"role": "user", "content": "x"}], model="m", max_output_tokens=10)
+    assert c.text == "hello" and c.cost_usd == 0.001 and c.finish_reason == "completed"
+    assert calls[0][0] == "POST" and all(m == "GET" for m, _ in calls[1:]) and calls[1][1].endswith("/v1/agent/resp_1")
+
+
+def test_background_poll_falls_back_to_responses_path(monkeypatch):
+    from optimizer.providers import PerplexityAgentProvider, ProviderError
+    p = PerplexityAgentProvider("k", poll_s=0.0)
+
+    def fake_http(method, url, payload=None, timeout=None):
+        if method == "POST":
+            return {"id": "r", "status": "queued"}
+        if "/v1/agent/" in url:
+            raise ProviderError("HTTP 404: nope")
+        return {"id": "r", "status": "completed", "output_text": "ok", "usage": {}}
+
+    monkeypatch.setattr(p, "_http", fake_http)
+    assert p.complete([{"role": "user", "content": "x"}], model="m", max_output_tokens=10).text == "ok"

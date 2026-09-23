@@ -58,13 +58,16 @@ class Provider(Protocol):
 
 
 def build_agent_request(messages: Sequence[Dict[str, str]], *, model: str, max_output_tokens: int,
-                        temperature: Optional[float] = None, cache_key: Optional[str] = None) -> Dict[str, object]:
+                        temperature: Optional[float] = None, cache_key: Optional[str] = None,
+                        background: bool = False) -> Dict[str, object]:
     """The Agent API body. System content goes in `instructions`; the rest in
     `input` as role/content items. No `tools`, ever."""
     system = "\n\n".join(m["content"] for m in messages if m["role"] == "system")
     inputs = [{"role": m["role"], "content": m["content"]} for m in messages if m["role"] != "system"]
     body: Dict[str, object] = {"model": model, "input": inputs, "max_output_tokens": max_output_tokens,
-                               "store": False}          # the artifacts are the record; nothing is kept server-side
+                               "store": bool(background)}   # background mode needs a stored response to poll; otherwise nothing is kept server-side
+    if background:
+        body["background"] = True
     if system:
         body["instructions"] = system
     if temperature is not None:
@@ -111,53 +114,36 @@ def extract_cost(data: Dict[str, object]) -> Optional[float]:
 class PerplexityAgentProvider:
     name = "perplexity-agent"
 
-    def __init__(self, api_key: str, *, url: str = AGENT_URL, timeout_s: float = 360.0, max_retries: int = 4):
+    def __init__(self, api_key: str, *, url: str = AGENT_URL, timeout_s: float = 360.0, max_retries: int = 4,
+                 background: bool = True, poll_s: float = 5.0, deadline_s: float = 1800.0):
+        """background=True submits the request and polls for the result instead of holding one
+        HTTP connection open for the whole generation (long-reasoning calls were dropping)."""
         if not api_key:
             raise ProviderError("PERPLEXITY_API_KEY is empty")
         self.api_key = api_key
         self.url = url
         self.timeout_s = timeout_s
         self.max_retries = max_retries
+        self.background = background
+        self.poll_s = poll_s
+        self.deadline_s = deadline_s
 
-    def complete(self, messages: Sequence[Dict[str, str]], *, model: str, max_output_tokens: int,
-                 temperature: Optional[float] = None, cache_key: Optional[str] = None) -> Completion:
-        body = build_agent_request(messages, model=model, max_output_tokens=max_output_tokens,
-                                   temperature=temperature, cache_key=cache_key)
-        payload = json.dumps(body).encode()
+    def _headers(self) -> Dict[str, str]:
+        return {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json",
+                "User-Agent": f"rsi-loop-2/{PROVIDER_VERSION}"}
+
+    def _http(self, method: str, url: str, payload: Optional[bytes] = None, timeout: Optional[float] = None) -> Dict[str, object]:
+        """One HTTP exchange with retries on transient failures. Returns the parsed JSON body."""
         last: Optional[str] = None
         for attempt in range(self.max_retries + 1):
-            req = urllib.request.Request(self.url, data=payload, method="POST", headers={
-                "Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json",
-                "User-Agent": f"rsi-loop-2/{PROVIDER_VERSION}"})
-            t0 = time.time()
+            req = urllib.request.Request(url, data=payload, method=method, headers=self._headers())
             try:
-                with urllib.request.urlopen(req, timeout=self.timeout_s) as resp:
-                    data = json.loads(resp.read().decode())
-                text = extract_text(data)
-                status = data.get("status")
-                inc = data.get("incomplete_details") or {}
-                reason = inc.get("reason") if isinstance(inc, dict) else None
-                if data.get("error") or status in ("failed", "cancelled"):
-                    raise ProviderError(f"provider reported failure: {json.dumps(diagnostics(data))[:1500]}", raw=data)
-                finish = "completed"
-                if status == "incomplete":
-                    finish = "max_output_tokens" if reason == "max_output_tokens" else "incomplete"
-                if not text:
-                    # No message text at all. If the output budget was exhausted (e.g. by reasoning),
-                    # that is the model's reply to correct, not an infrastructure failure.
-                    if finish != "completed":
-                        finish = finish if finish != "incomplete" else "empty"
-                        return Completion(text="", model=str(data.get("model", model)), usage=dict(data.get("usage") or {}),
-                                          cost_usd=extract_cost(data), response_id=data.get("id"),
-                                          latency_s=round(time.time() - t0, 3), raw=data, finish_reason=finish)
-                    raise ProviderError(f"empty completion with status {status!r}: {json.dumps(diagnostics(data))[:1500]}", raw=data)
-                return Completion(text=text, model=str(data.get("model", model)), usage=dict(data.get("usage") or {}),
-                                  cost_usd=extract_cost(data), response_id=data.get("id"),
-                                  latency_s=round(time.time() - t0, 3), raw=data, finish_reason=finish)
+                with urllib.request.urlopen(req, timeout=timeout or self.timeout_s) as resp:
+                    return json.loads(resp.read().decode())
             except urllib.error.HTTPError as e:
                 detail = e.read().decode(errors="replace")[:1000]
                 last = f"HTTP {e.code}: {detail}"
-                if e.code in (404, 408, 429, 499, 500, 502, 503, 504) and attempt < self.max_retries:   # 404 seen transiently on the Agent API, 23 Sep 2026
+                if e.code in (404, 408, 429, 499, 500, 502, 503, 504) and attempt < self.max_retries:
                     time.sleep(5.0 * (2 ** attempt))
                     continue
                 raise ProviderError(last) from None
@@ -168,6 +154,60 @@ class PerplexityAgentProvider:
                     continue
                 raise ProviderError(last) from None
         raise ProviderError(last or "unknown provider failure")
+
+    def _poll(self, response_id: str, t0: float) -> Dict[str, object]:
+        """GET the stored response until it leaves queued/in_progress. Tries the two
+        retrieval paths the Agent API documents (its own and the OpenAI-compatible alias)."""
+        base = self.url.rsplit("/v1/", 1)[0]
+        paths = [f"{base}/v1/agent/{response_id}", f"{base}/v1/responses/{response_id}"]
+        path_i = 0
+        while True:
+            if time.time() - t0 > self.deadline_s:
+                raise ProviderError(f"background response {response_id} not finished after {self.deadline_s:.0f}s")
+            time.sleep(self.poll_s)
+            try:
+                data = self._http("GET", paths[path_i], timeout=60.0)
+            except ProviderError as e:
+                if "HTTP 404" in str(e) and path_i + 1 < len(paths):
+                    path_i += 1
+                    continue
+                raise
+            status = data.get("status")
+            if status not in ("queued", "in_progress", None):
+                return data
+
+    def complete(self, messages: Sequence[Dict[str, str]], *, model: str, max_output_tokens: int,
+                 temperature: Optional[float] = None, cache_key: Optional[str] = None) -> Completion:
+        body = build_agent_request(messages, model=model, max_output_tokens=max_output_tokens,
+                                   temperature=temperature, cache_key=cache_key, background=self.background)
+        t0 = time.time()
+        data = self._http("POST", self.url, json.dumps(body).encode())
+        if self.background and data.get("status") in ("queued", "in_progress") and data.get("id"):
+            data = self._poll(str(data["id"]), t0)
+        return self._to_completion(data, model, t0)
+
+    def _to_completion(self, data: Dict[str, object], model: str, t0: float) -> Completion:
+        text = extract_text(data)
+        status = data.get("status")
+        inc = data.get("incomplete_details") or {}
+        reason = inc.get("reason") if isinstance(inc, dict) else None
+        if data.get("error") or status in ("failed", "cancelled"):
+            raise ProviderError(f"provider reported failure: {json.dumps(diagnostics(data))[:1500]}", raw=data)
+        finish = "completed"
+        if status == "incomplete":
+            finish = "max_output_tokens" if reason == "max_output_tokens" else "incomplete"
+        if not text:
+            # No message text at all. If the output budget was exhausted (e.g. by reasoning),
+            # that is the model's reply to correct, not an infrastructure failure.
+            if finish != "completed":
+                finish = finish if finish != "incomplete" else "empty"
+                return Completion(text="", model=str(data.get("model", model)), usage=dict(data.get("usage") or {}),
+                                  cost_usd=extract_cost(data), response_id=data.get("id"),
+                                  latency_s=round(time.time() - t0, 3), raw=data, finish_reason=finish)
+            raise ProviderError(f"empty completion with status {status!r}: {json.dumps(diagnostics(data))[:1500]}", raw=data)
+        return Completion(text=text, model=str(data.get("model", model)), usage=dict(data.get("usage") or {}),
+                          cost_usd=extract_cost(data), response_id=data.get("id"),
+                          latency_s=round(time.time() - t0, 3), raw=data, finish_reason=finish)
 
 
 class ScriptedProvider:

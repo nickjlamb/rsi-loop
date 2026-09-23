@@ -20,12 +20,13 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="anthropic/claude-sonnet-5")
     ap.add_argument("--dump", action="store_true", help="print the raw response JSON")
+    ap.add_argument("--sync", action="store_true", help="hold the connection open instead of background+poll")
     a = ap.parse_args(argv)
     key = os.environ.get("PERPLEXITY_API_KEY", "")
     if not key:
         print("PERPLEXITY_API_KEY is not set", file=sys.stderr)
         return 2
-    p = PerplexityAgentProvider(key)
+    p = PerplexityAgentProvider(key, background=not a.sync)
     msgs = [{"role": "system", "content": "Reply with exactly one short sentence."},
             {"role": "user", "content": "State the model you are and confirm you did not use web search."}]
     try:
@@ -38,6 +39,7 @@ def main(argv=None) -> int:
     print("usage:", json.dumps(c.usage))
     print("cost_usd:", c.cost_usd)
     print("raw keys:", sorted((c.raw or {}).keys()))
+    print("status:", (c.raw or {}).get("status"), "| background:", (c.raw or {}).get("background"), "| mode:", "sync" if a.sync else "background+poll")
     if a.dump:
         print(json.dumps(c.raw, indent=1)[:6000])
     return 0
