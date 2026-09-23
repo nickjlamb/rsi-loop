@@ -157,7 +157,7 @@ class PerplexityAgentProvider:
             except urllib.error.HTTPError as e:
                 detail = e.read().decode(errors="replace")[:1000]
                 last = f"HTTP {e.code}: {detail}"
-                if e.code in (429, 500, 502, 503, 504) and attempt < self.max_retries:
+                if e.code in (408, 429, 499, 500, 502, 503, 504) and attempt < self.max_retries:
                     time.sleep(5.0 * (2 ** attempt))
                     continue
                 raise ProviderError(last) from None
