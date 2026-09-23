@@ -112,8 +112,30 @@ def test_cost_guard_halts_and_records(tmp_path):
     assert traj["status"] == "halted"
 
 
-def test_provider_failure_halts_after_recording_the_generation(tmp_path):
-    prov = ScriptedProvider([])
-    st = run_trajectory(cfg(tmp_path, "B", 3), provider=prov, quiet=True)
-    assert len(st.summaries) == 1 and st.summaries[0].outcome == "provider_failure" and st.halted
-    assert st.summaries[0].category == "sandbox"            # no candidate → invalid bundle → sandbox category
+def test_provider_failure_is_not_a_proposal_and_is_resumable(tmp_path):
+    from loop.mock_optimiser import ScriptedOptimiser
+    prov = ScriptedProvider([ScriptedOptimiser("B")] * 2)        # two calls, then "exhausted" = infrastructure failure
+    st = run_trajectory(cfg(tmp_path, "B", 4), provider=prov, quiet=True)
+    assert len(st.summaries) == 2 and st.halted and "provider failure at generation 3" in st.halted
+    tdir = cfg(tmp_path, "B", 4).trajectory_dir
+    assert not (tdir / "gen_03").exists()
+    traj = json.loads((tdir / "trajectory.json").read_text())
+    assert traj["status"] == "halted" and traj["infrastructure_failures"][0]["generation"] == 3
+    # resume with a working provider: generations 1-2 are loaded, 3-4 are run
+    st2 = run_trajectory(cfg(tmp_path, "B", 4), quiet=True)
+    assert len(st2.summaries) == 4 and st2.halted is None
+    assert [s.category for s in st2.summaries][:2] == [s.category for s in st.summaries]
+
+
+def test_legacy_provider_failure_generation_is_purged_on_resume(tmp_path):
+    """A DONE generation recorded as provider_failure (pre-fix artifacts) is re-run, not counted."""
+    run_trajectory(cfg(tmp_path, "B", 2), quiet=True)
+    tdir = cfg(tmp_path, "B", 3).trajectory_dir
+    g3 = tdir / "gen_03"
+    g3.mkdir()
+    (g3 / "scores.json").write_text(json.dumps({"generation": 3, "outcome": "provider_failure",
+                                                "bundle": {}, "decision": {"accepted": False, "category": "sandbox", "detail": ""}}))
+    (g3 / "call.json").write_text("{}")
+    (g3 / "DONE").write_text("ok\n")
+    st = run_trajectory(cfg(tmp_path, "B", 3), quiet=True)
+    assert len(st.summaries) == 3 and st.summaries[2].outcome == "submitted"

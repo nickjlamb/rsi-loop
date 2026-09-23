@@ -100,7 +100,7 @@ def extract_cost(data: Dict[str, object]) -> Optional[float]:
 class PerplexityAgentProvider:
     name = "perplexity-agent"
 
-    def __init__(self, api_key: str, *, url: str = AGENT_URL, timeout_s: float = 300.0, max_retries: int = 3):
+    def __init__(self, api_key: str, *, url: str = AGENT_URL, timeout_s: float = 900.0, max_retries: int = 4):
         if not api_key:
             raise ProviderError("PERPLEXITY_API_KEY is empty")
         self.api_key = api_key
@@ -132,13 +132,13 @@ class PerplexityAgentProvider:
                 detail = e.read().decode(errors="replace")[:1000]
                 last = f"HTTP {e.code}: {detail}"
                 if e.code in (429, 500, 502, 503, 504) and attempt < self.max_retries:
-                    time.sleep(2.0 * (attempt + 1))
+                    time.sleep(5.0 * (2 ** attempt))
                     continue
                 raise ProviderError(last) from None
-            except (urllib.error.URLError, TimeoutError) as e:
+            except (urllib.error.URLError, TimeoutError, OSError) as e:
                 last = f"network: {e}"
                 if attempt < self.max_retries:
-                    time.sleep(2.0 * (attempt + 1))
+                    time.sleep(5.0 * (2 ** attempt))
                     continue
                 raise ProviderError(last) from None
         raise ProviderError(last or "unknown provider failure")

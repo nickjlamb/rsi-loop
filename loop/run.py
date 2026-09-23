@@ -18,6 +18,11 @@ Artifact layout (design E.2):
         gen_NN/timing.json             wall-clock only (excluded from the resume-identity test)
         gen_NN/DONE                    written last; a generation without it is re-run on resume
 
+An infrastructure failure (provider error after retries) is NOT a proposal
+(design D.7): nothing is persisted for that generation, the failure is listed
+in trajectory.json["infrastructure_failures"], the trajectory halts, and
+re-running the same command resumes at that generation.
+
 Resume: a generation with DONE is loaded, never re-run; the loop carries on
 from the last completed one. Kill-and-resume therefore reproduces the same
 tree for a deterministic optimiser and never loses a paid completion.
@@ -29,6 +34,7 @@ import argparse
 import difflib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -159,8 +165,11 @@ def run_trajectory(cfg: RunConfig, provider: Optional[Provider] = None, *, quiet
     for gen in range(1, cfg.generations + 1):
         gdir = tdir / f"gen_{gen:02d}"
         if (gdir / "DONE").exists():
-            _resume_generation(state, gdir, gen)
-            continue
+            if _load(gdir / "scores.json").get("outcome") == "provider_failure":
+                shutil.rmtree(gdir)          # an infrastructure failure is not a proposal (D.7); re-run it
+            else:
+                _resume_generation(state, gdir, gen)
+                continue
         if state.halted:
             break
         if state.cost_usd >= cfg.max_cost_usd:
@@ -180,6 +189,15 @@ def run_trajectory(cfg: RunConfig, provider: Optional[Provider] = None, *, quiet
         t_model = time.time() - t0
 
         prop = rec.proposal
+        if prop.outcome == "provider_failure":
+            traj.setdefault("infrastructure_failures", []).append(
+                {"generation": gen, "error": rec.error, "at": time.time(), "model_calls": rec.model_calls})
+            state.halted = f"provider failure at generation {gen}: {rec.error}"
+            shutil.rmtree(gdir, ignore_errors=True)
+            if not quiet:
+                print(f"[{cfg.run_id} {cfg.arm} seed {cfg.seed}] gen {gen:02d} INFRASTRUCTURE FAILURE (not a proposal; "
+                      f"re-run this command to resume): {rec.error}")
+            break
         bundle = _missing_bundle(prop.outcome) if prop.source is None else score_candidate(prop.source, ds)
         t_score = time.time() - t0 - t_model
 
@@ -214,8 +232,6 @@ def run_trajectory(cfg: RunConfig, provider: Optional[Provider] = None, *, quiet
         (gdir / "DONE").write_text("ok\n")
 
         _apply(state, gen, prop, bundle, decision, rec.local_evals, rec.cost_usd, discrepancy)
-        if rec.error and prop.outcome == "provider_failure":
-            state.halted = f"provider failure at generation {gen}: {rec.error}"
         if not quiet:
             print(f"[{cfg.run_id} {cfg.arm} seed {cfg.seed}] gen {gen:02d} {prop.outcome:16s} "
                   f"{'ACCEPT' if decision.accepted else 'reject':6s} {decision.category:14s} "
