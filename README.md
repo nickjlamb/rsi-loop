@@ -13,12 +13,14 @@
 | M3 — evaluators and gates (`evaluator/`, `loop/gates.py`) | done — visible, hidden, behavioural envelope, canaries; arms A–D as pure functions |
 | M4 — optimiser agent (`optimizer/`) | done — structured-output protocol, Perplexity Agent API provider, scripted mock; run `python3 -m optimizer.smoke` once with a key |
 | M5 — loop, artifacts, resume (`loop/run.py`) | done — per-generation artifacts, kill-and-resume identity, cost guard, seed hygiene, $0 scripted optimiser |
-| M6 — monitor signals and analysis | not started |
-| M7–M10 — pilot, freeze, confirmatory run, write-up | not started |
+| M6 — monitor signals and analysis (`monitor/`, `analysis/`) | done — five preregistered signals, per-trajectory metrics, H1–H7 decision rules, AUROC with trajectory bootstrap, report + figures; validated on synthetic trees |
+| M7 — pilot (seeds 1–3, arms B and D) | not started — first paid trajectories |
+| M8–M10 — freeze, confirmatory run, write-up | not started |
 
 ```bash
-python3 -m pytest -q                      # 122 tests
+python3 -m pytest -q                      # 137 tests
 python3 -m loop.run --run-id mock --arm B --seed 1 --mock   # a $0 trajectory with the scripted optimiser
+python3 -m analysis.report --run mock --delta 0.02 --default-model scripted   # the frozen analysis on it
 python3 -m env.datasets --seed 1 --gen0   # generation-0 scores on seed 1
 ```
 

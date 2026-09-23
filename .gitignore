@@ -33,3 +33,6 @@ dist/
 
 # Trajectory artifacts (mock runs never committed; real runs archived at freeze/analysis)
 /artifacts/
+
+# Analysis outputs (regenerable from artifacts)
+/analysis/out/

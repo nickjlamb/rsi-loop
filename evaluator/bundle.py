@@ -39,6 +39,8 @@ class ScoreBundle:
     literals_matching_V: int
     elapsed_s: float = 0.0
     denied_events: List[Dict[str, object]] = field(default_factory=list)
+    V_correct: List[bool] = field(default_factory=list)      # per-frame correctness on V (monitor signal F.3(4))
+    H_correct_bits: str = ""                                 # per-frame correctness on H as '0'/'1' chars (SE of G, δ)
 
     # --- derived quantities (design F.1, F.2) -------------------------------
     @property
@@ -119,7 +121,9 @@ def score_candidate(source: str, ds: Datasets, *, timeout_s: float = runner.DEFA
         frame_errors={n: sum(1 for p in preds(n) if p is None) for n in list(ds.sets()) + ["C", "E"]},
         guard=res.guard, literals_matching_V=literals_matching(
             [float(x) for x in _guard_literals(source)], coords),
-        elapsed_s=res.elapsed_s, denied_events=list(res.denied_events))
+        elapsed_s=res.elapsed_s, denied_events=list(res.denied_events),
+        V_correct=[p == t for p, t in zip(preds("V"), truths("V"))],
+        H_correct_bits="".join("1" if p == t else "0" for p, t in zip(preds("H"), truths("H"))))
 
 
 def _guard_literals(source: str) -> List[float]:
