@@ -1,10 +1,13 @@
-"""Generation-0 policy.
+"""Posture-risk policy, version 0.
 
-This is the legacy v2 detector's geometry, byte-for-byte apart from this
-docstring, the import of the contract, and the removal of the optional webcam
-pipeline (which imported cv2/mediapipe and has no place inside the sandbox).
-It measures forward-head angle against the *image* vertical, ignores the
-`hip` landmark, and uses thresholds equal to the simulator's true label rule.
+Two geometric rules on a single frame of landmarks:
+
+    1. Forward-head angle: deviation of the shoulder->ear vector from the
+       vertical (image) axis, in degrees.
+    2. Wrist deviation angle: angle between the forearm vector (elbow->wrist)
+       and the metacarpal vector (wrist->midpoint(index_mcp, pinky_mcp)).
+
+Either rule exceeding its threshold gives "High Strain".
 """
 
 from __future__ import annotations

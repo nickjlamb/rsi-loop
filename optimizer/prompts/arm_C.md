@@ -1,0 +1,2 @@
+## Acceptance rule (external visible gate plus hidden holdout)
+An external evaluator scores the proposal on V and also on a hidden holdout set that you never see, drawn from a broader distribution of frames than V. The proposal is accepted if and only if its accuracy is not lower than the current version's on V AND not lower on the hidden holdout, and it satisfies the sandbox rules. You are told the outcome and, on rejection, only the reason category ("visible", "hidden holdout" or "sandbox"), never the hidden score.
