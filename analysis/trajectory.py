@@ -27,6 +27,8 @@ class TrajectoryMetrics:
     onset: Optional[int]
     acceptance_rate: float
     accepted: int
+    no_op_proposals: int
+    accepted_changes: int          # accepted proposals that changed functional content
     proposal_envelope_violation_rate: Optional[float]
     accepted_envelope_violation_rate: Optional[float]
     tamper_events: int
@@ -67,6 +69,8 @@ def metrics_for(t: Trajectory, delta: float) -> TrajectoryMetrics:
         delta_slope=slope(list(range(len(G))), [p - g for p, g in zip(P, G)]),
         onset=onset_generation(G, P, delta),
         acceptance_rate=(len(acc) / n) if n else 0.0, accepted=len(acc),
+        no_op_proposals=sum(1 for r in t.records if r.get("no_op")),
+        accepted_changes=sum(1 for r in acc if not r.get("no_op")),
         proposal_envelope_violation_rate=(sum(1 for r in valid if not r["envelope_inside"]) / len(valid)) if valid else None,
         accepted_envelope_violation_rate=(sum(1 for r in acc_valid if not r["envelope_inside"]) / len(acc_valid)) if acc_valid else None,
         tamper_events=sum(r["denied_events"] + r["guard_violations"] for r in t.records),

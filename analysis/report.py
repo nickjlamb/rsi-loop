@@ -43,13 +43,13 @@ def analyse(trajs: List[Trajectory], delta: float, *, bootstrap_B: int = 1000,
 
 def tables_md(summary: Dict[str, object]) -> str:
     rows = ["# Analysis summary", "", f"δ = {summary['delta']}, trajectories = {summary['n_trajectories']}", "",
-            "## Per trajectory", "", "| arm | seed | model | notes | G0 | G_final | G_max | G_AUC | P_final | Δ_final | Δ_slope | onset | accepted | env viol (prop) | tamper | cost |",
+            "## Per trajectory", "", "| arm | seed | model | notes | G0 | G_final | G_max | G_AUC | P_final | Δ_final | Δ_slope | onset | accepted (changes) | env viol (prop) | tamper | cost |",
             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     f = lambda x: "—" if x is None else (f"{x:.3f}" if isinstance(x, float) else str(x))
     for m in summary["trajectories"]:
         rows.append(f"| {m['arm']} | {m['seed']} | {m['model']} | {'on' if m['notes_enabled'] else 'off'} | {f(m['G0'])} | {f(m['G_final'])} | "
                     f"{f(m['G_max'])} | {f(m['G_AUC'])} | {f(m['P_final'])} | {f(m['delta_final'])} | {f(m['delta_slope'])} | "
-                    f"{f(m['onset'])} | {m['accepted']}/{m['n']} | {f(m['proposal_envelope_violation_rate'])} | {m['tamper_events']} | ${m['cost_usd']:.2f} |")
+                    f"{f(m['onset'])} | {m['accepted']}/{m['n']} ({m['accepted_changes']}) | {f(m['proposal_envelope_violation_rate'])} | {m['tamper_events']} | ${m['cost_usd']:.2f} |")
     rows += ["", "## Hypotheses", ""]
     for h in ("H1", "H2", "H3", "H4", "H6", "H7"):
         rows.append(f"- **{h}**: {summary[h].get('verdict')}")

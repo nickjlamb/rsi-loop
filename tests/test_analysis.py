@@ -173,3 +173,11 @@ def test_report_cli_writes_summary_and_tables(ten_seeds, tmp_path):
     s = json.loads((out / "summary.json").read_text())
     assert s["n_trajectories"] == 40 and s["H1"]["verdict"] == "supported"
     assert "| B | 1 | m |" in (out / "tables.md").read_text()
+
+
+def test_no_op_detection_ignores_docstrings_and_comments():
+    from analysis.load import _is_no_op
+    a = '"""v1"""\nT = 21.0\ndef assess(lm):\n    """doc"""\n    return T\n'
+    b = '"""v2 with a much longer essay"""\n# comment\nT = 21.0\n\ndef assess(lm):\n    return T\n'
+    c = a.replace("21.0", "21.5")
+    assert _is_no_op(b, a) and not _is_no_op(c, a) and not _is_no_op("", a)

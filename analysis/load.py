@@ -38,7 +38,7 @@ def _load(p: Path) -> Dict[str, object]:
     return json.loads(p.read_text())
 
 
-def _record(gen: int, sc: Dict[str, object], call: Dict[str, object]) -> Dict[str, object]:
+def _record(gen: int, sc: Dict[str, object], call: Dict[str, object], gdir_policy: str = "", parent_policy: str = "") -> Dict[str, object]:
     b = sc.get("bundle", {})
     valid = bool(b.get("sandbox_valid"))
     guard = b.get("guard") or {}
@@ -57,11 +57,34 @@ def _record(gen: int, sc: Dict[str, object], call: Dict[str, object]) -> Dict[st
         "literals_matching_V": b.get("literals_matching_V"),
         "V_correct": b.get("V_correct") or [], "H_correct_bits": b.get("H_correct_bits") or "",
         "diff_lines": sc.get("diff_lines"), "local_evals": call.get("local_evals", 0),
+        "no_op": _is_no_op(gdir_policy, parent_policy),
         "cost_usd": call.get("cost_usd", 0.0), "input_tokens": call.get("input_tokens", 0),
         "output_tokens": call.get("output_tokens", 0),
         "self_report": sc.get("self_report") or {}, "self_report_discrepancy": sc.get("self_report_discrepancy"),
         "rationale": sc.get("rationale", ""),
     }
+
+
+def _strip_docstrings_and_comments(src: str) -> str:
+    """Functional content only: a proposal that changes nothing but prose is a no-op."""
+    import ast
+    try:
+        tree = ast.parse(src)
+    except SyntaxError:
+        return src
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            body = getattr(node, "body", [])
+            if body and isinstance(body[0], ast.Expr) and isinstance(getattr(body[0], "value", None), ast.Constant) \
+                    and isinstance(body[0].value.value, str):
+                node.body = body[1:] or [ast.Pass()]
+    return ast.dump(tree)
+
+
+def _is_no_op(policy: str, parent: str) -> bool:
+    if not policy or not parent:
+        return False
+    return _strip_docstrings_and_comments(policy) == _strip_docstrings_and_comments(parent)
 
 
 def load_trajectory(tdir: Path) -> Trajectory:
@@ -74,14 +97,17 @@ def load_trajectory(tdir: Path) -> Trajectory:
                          "envelope_inside": bool(g0["envelope"]["inside"]), "H_correct_bits": g0.get("H_correct_bits", "")})
     cur = dict(t.gen0)
     t.lineage.append({"generation": 0, **cur})
+    parent_src = (tdir / "gen_00" / "policy.py").read_text() if (tdir / "gen_00" / "policy.py").exists() else ""
     gen = 1
     while (tdir / f"gen_{gen:02d}" / "DONE").exists():
         gdir = tdir / f"gen_{gen:02d}"
-        rec = _record(gen, _load(gdir / "scores.json"), _load(gdir / "call.json"))
+        src = (gdir / "policy.py").read_text() if (gdir / "policy.py").exists() else ""
+        rec = _record(gen, _load(gdir / "scores.json"), _load(gdir / "call.json"), src, parent_src)
         t.records.append(rec)
         if rec["accepted"] and rec["sandbox_valid"]:
             cur = {"P_V": rec["P_V"], "P_Vprime": rec["P_Vprime"], "P_Hprime": rec["P_Hprime"], "G": rec["G"],
                    "envelope_inside": rec["envelope_inside"], "H_correct_bits": rec["H_correct_bits"]}
+            parent_src = src or parent_src
         t.lineage.append({"generation": gen, **cur})
         gen += 1
     return t
