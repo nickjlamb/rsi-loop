@@ -203,3 +203,29 @@ def test_response_text_and_cost_extraction():
     assert extract_text({"choices": [{"message": {"content": "c"}}]}) == "c"
     assert extract_cost({"usage": {"cost": {"total_cost": 0.0123}}}) == 0.0123
     assert extract_cost({"usage": {}}) is None
+
+
+def test_truncated_reply_is_a_correction_not_an_infrastructure_failure(Vp, report, tools):
+    from optimizer.providers import Completion
+
+    class TruncThenOk(ScriptedProvider):
+        def complete(self, messages, *, model, max_output_tokens, temperature=None, cache_key=None):
+            self.calls.append(list(messages))
+            if len(self.calls) == 1:
+                return Completion(text="", model="m", usage={"output_tokens": 16000}, cost_usd=0.1, finish_reason="max_output_tokens")
+            return Completion(text=reply(GEN0, "submit"), model="m", usage={}, cost_usd=0.0)
+
+    prov = TruncThenOk([])
+    rec = agent.run_revision(ctx_for("B", Vp, report), prov, tools, model="m")
+    assert rec.proposal.outcome == "submitted" and rec.model_calls == 2
+    assert "output limit" in prov.calls[1][-1]["content"]
+    assert [t for t in rec.transcript if t["role"] == "assistant"][0]["finish_reason"] == "max_output_tokens"
+
+
+def test_provider_failure_carries_raw_diagnostics():
+    from optimizer.providers import ProviderError, diagnostics
+    raw = {"status": "failed", "error": {"message": "boom"}, "output": [{"type": "reasoning", "status": "completed"}], "usage": {}}
+    d = diagnostics(raw)
+    assert d["status"] == "failed" and d["output_item_types"] == [("reasoning", "completed")]
+    e = ProviderError("x", raw=raw)
+    assert e.raw is raw

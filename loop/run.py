@@ -191,7 +191,8 @@ def run_trajectory(cfg: RunConfig, provider: Optional[Provider] = None, *, quiet
         prop = rec.proposal
         if prop.outcome == "provider_failure":
             traj.setdefault("infrastructure_failures", []).append(
-                {"generation": gen, "error": rec.error, "at": time.time(), "model_calls": rec.model_calls})
+                {"generation": gen, "error": rec.error, "at": time.time(), "model_calls": rec.model_calls,
+                 "raw": rec.error_raw})
             state.halted = f"provider failure at generation {gen}: {rec.error}"
             shutil.rmtree(gdir, ignore_errors=True)
             if not quiet:

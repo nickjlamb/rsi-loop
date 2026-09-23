@@ -25,7 +25,17 @@ PROVIDER_VERSION = "0.1.0"
 
 
 class ProviderError(RuntimeError):
-    pass
+    def __init__(self, message: str, raw: Optional[Dict[str, object]] = None):
+        super().__init__(message)
+        self.raw = raw
+
+
+def diagnostics(data: Dict[str, object]) -> Dict[str, object]:
+    """What we keep when a response is odd: enough to see why without the prompts."""
+    out_items = data.get("output") or []
+    return {"status": data.get("status"), "incomplete_details": data.get("incomplete_details"),
+            "error": data.get("error"), "output_item_types": [(i.get("type"), i.get("status")) for i in out_items if isinstance(i, dict)],
+            "usage": data.get("usage"), "model": data.get("model"), "id": data.get("id")}
 
 
 @dataclass
@@ -37,6 +47,7 @@ class Completion:
     response_id: Optional[str] = None
     latency_s: float = 0.0
     raw: Optional[Dict[str, object]] = None
+    finish_reason: str = "completed"          # completed | max_output_tokens | incomplete | empty
 
 
 class Provider(Protocol):
@@ -123,11 +134,26 @@ class PerplexityAgentProvider:
                 with urllib.request.urlopen(req, timeout=self.timeout_s) as resp:
                     data = json.loads(resp.read().decode())
                 text = extract_text(data)
+                status = data.get("status")
+                inc = data.get("incomplete_details") or {}
+                reason = inc.get("reason") if isinstance(inc, dict) else None
+                if data.get("error") or status in ("failed", "cancelled"):
+                    raise ProviderError(f"provider reported failure: {json.dumps(diagnostics(data))[:1500]}", raw=data)
+                finish = "completed"
+                if status == "incomplete":
+                    finish = "max_output_tokens" if reason == "max_output_tokens" else "incomplete"
                 if not text:
-                    raise ProviderError(f"empty completion; raw keys: {sorted(data)}")
+                    # No message text at all. If the output budget was exhausted (e.g. by reasoning),
+                    # that is the model's reply to correct, not an infrastructure failure.
+                    if finish != "completed":
+                        finish = finish if finish != "incomplete" else "empty"
+                        return Completion(text="", model=str(data.get("model", model)), usage=dict(data.get("usage") or {}),
+                                          cost_usd=extract_cost(data), response_id=data.get("id"),
+                                          latency_s=round(time.time() - t0, 3), raw=data, finish_reason=finish)
+                    raise ProviderError(f"empty completion with status {status!r}: {json.dumps(diagnostics(data))[:1500]}", raw=data)
                 return Completion(text=text, model=str(data.get("model", model)), usage=dict(data.get("usage") or {}),
                                   cost_usd=extract_cost(data), response_id=data.get("id"),
-                                  latency_s=round(time.time() - t0, 3), raw=data)
+                                  latency_s=round(time.time() - t0, 3), raw=data, finish_reason=finish)
             except urllib.error.HTTPError as e:
                 detail = e.read().decode(errors="replace")[:1000]
                 last = f"HTTP {e.code}: {detail}"

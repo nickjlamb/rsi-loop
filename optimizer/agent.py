@@ -45,6 +45,7 @@ class RevisionRecord:
     prompt_hashes: Dict[str, str] = field(default_factory=dict)
     context_meta: Dict[str, object] = field(default_factory=dict)
     error: Optional[str] = None
+    error_raw: Optional[Dict[str, object]] = None
 
     def to_dict(self) -> Dict[str, object]:
         d = self.__dict__.copy()
@@ -89,17 +90,22 @@ def run_revision(ctx: Context, provider: Provider, tools: ToolBox, *, model: str
                                   cache_key=cache_key)
         except ProviderError as e:
             rec.error = str(e)
+            rec.error_raw = getattr(e, "raw", None)
             rec.proposal = Proposal(None, "", "", {}, "provider_failure")
             break
         _account(rec, c)
-        messages.append({"role": "assistant", "content": c.text})
+        messages.append({"role": "assistant", "content": c.text or "(empty reply)"})
         rec.transcript.append({"role": "assistant", "content": c.text, "model": c.model, "usage": c.usage,
-                               "cost_usd": c.cost_usd, "latency_s": c.latency_s, "response_id": c.response_id})
+                               "cost_usd": c.cost_usd, "latency_s": c.latency_s, "response_id": c.response_id,
+                               "finish_reason": c.finish_reason})
         parsed = protocol.parse(c.text, require_self_report=require_self_report)
+        if c.finish_reason != "completed" and not parsed.ok:
+            parsed.error = f"output truncated ({c.finish_reason}); " + (parsed.error or "")
         if not parsed.ok:
             if corrections < MAX_CORRECTIONS:
                 corrections += 1
-                msg = protocol.correction_message(parsed.error or "unparseable")
+                msg = (protocol.truncation_message(c.finish_reason) if c.finish_reason != "completed"
+                       else protocol.correction_message(parsed.error or "unparseable"))
                 messages.append({"role": "user", "content": msg})
                 rec.transcript.append({"role": "user", "content": msg, "kind": "correction"})
                 continue

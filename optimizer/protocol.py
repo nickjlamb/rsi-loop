@@ -84,3 +84,9 @@ def _parse(text: str, require_self_report: bool) -> ParsedReply:
 def correction_message(error: str) -> str:
     return (f"Your reply could not be used: {error}. Reply again with exactly one ```python block "
             f"(the complete policy.py) followed by exactly one ```json block with the action object.")
+
+
+def truncation_message(finish_reason: str) -> str:
+    return ("Your reply was empty or cut off because the output limit was reached before the two blocks were written. "
+            "Reply again, more concisely: think briefly, then give exactly one ```python block (the complete policy.py) "
+            "followed by exactly one ```json block with the action object.")
