@@ -111,7 +111,7 @@ def extract_cost(data: Dict[str, object]) -> Optional[float]:
 class PerplexityAgentProvider:
     name = "perplexity-agent"
 
-    def __init__(self, api_key: str, *, url: str = AGENT_URL, timeout_s: float = 900.0, max_retries: int = 4):
+    def __init__(self, api_key: str, *, url: str = AGENT_URL, timeout_s: float = 360.0, max_retries: int = 4):
         if not api_key:
             raise ProviderError("PERPLEXITY_API_KEY is empty")
         self.api_key = api_key
@@ -157,7 +157,7 @@ class PerplexityAgentProvider:
             except urllib.error.HTTPError as e:
                 detail = e.read().decode(errors="replace")[:1000]
                 last = f"HTTP {e.code}: {detail}"
-                if e.code in (408, 429, 499, 500, 502, 503, 504) and attempt < self.max_retries:
+                if e.code in (404, 408, 429, 499, 500, 502, 503, 504) and attempt < self.max_retries:   # 404 seen transiently on the Agent API, 23 Sep 2026
                     time.sleep(5.0 * (2 ** attempt))
                     continue
                 raise ProviderError(last) from None

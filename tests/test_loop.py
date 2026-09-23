@@ -139,3 +139,28 @@ def test_legacy_provider_failure_generation_is_purged_on_resume(tmp_path):
     (g3 / "DONE").write_text("ok\n")
     st = run_trajectory(cfg(tmp_path, "B", 3), quiet=True)
     assert len(st.summaries) == 3 and st.summaries[2].outcome == "submitted"
+
+
+def test_batch_retries_infrastructure_failures_and_completes(tmp_path):
+    from loop.batch import plan, run_batch
+    from loop.mock_optimiser import ScriptedOptimiser
+
+    class Flaky(ScriptedProvider):
+        failures_left = 1
+        def complete(self, messages, *, model, max_output_tokens, temperature=None, cache_key=None):
+            if Flaky.failures_left and len(self.calls) == 1:
+                Flaky.failures_left -= 1
+                self.calls.append(list(messages))
+                raise ProviderError("simulated outage")
+            return super().complete(messages, model=model, max_output_tokens=max_output_tokens)
+
+    pairs = plan(["B", "D"], [1], shuffle_seed=3)
+    assert sorted(pairs) == [("B", 1), ("D", 1)]
+    log = run_batch("t", pairs, model="scripted", provider_factory=lambda cfg: Flaky([ScriptedOptimiser(cfg.arm)] * 40),
+                    attempts=3, pause_s=0, artifacts_root=tmp_path, mock=True, quiet=True, generations=3)
+    per = {}
+    for e in log:
+        per.setdefault((e["arm"], e["seed"]), []).append(e)
+    assert all(v[-1]["generations"] == 3 and v[-1]["halted"] is None for v in per.values())
+    assert any(len(v) == 2 for v in per.values())              # one trajectory needed a retry
+    assert (tmp_path / "t" / "batch.json").exists()
