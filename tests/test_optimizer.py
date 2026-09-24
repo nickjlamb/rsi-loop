@@ -273,3 +273,22 @@ def test_reasoning_effort_is_sent_only_when_set():
     assert "reasoning" not in build_agent_request([{"role": "user", "content": "x"}], model="m", max_output_tokens=10)
     b = build_agent_request([{"role": "user", "content": "x"}], model="m", max_output_tokens=10, reasoning_effort="medium")
     assert b["reasoning"] == {"effort": "medium"}
+
+
+def test_phantom_completion_is_resubmitted(monkeypatch):
+    from optimizer.providers import PerplexityAgentProvider
+    p = PerplexityAgentProvider("k", poll_s=0.0, max_retries=2)
+    posts = []
+    phantom = {"id": "r1", "status": "completed", "output": [], "usage": {"total_tokens": 0}}
+    good = {"id": "r2", "status": "completed", "output_text": "ok", "usage": {"total_tokens": 5}}
+
+    def fake_http(method, url, payload=None, timeout=None):
+        if method == "POST":
+            posts.append(json.loads(payload)["metadata"]["nonce"])
+            return {"id": f"r{len(posts)}", "status": "queued"}
+        return phantom if len(posts) == 1 else good
+
+    monkeypatch.setattr(p, "_http", fake_http)
+    monkeypatch.setattr("time.sleep", lambda s: None)
+    c = p.complete([{"role": "user", "content": "x"}], model="m", max_output_tokens=10)
+    assert c.text == "ok" and len(posts) == 2 and posts[0] != posts[1]      # distinct nonces defeat de-duplication

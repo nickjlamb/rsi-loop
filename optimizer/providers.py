@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import time
+import uuid
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
@@ -105,6 +106,13 @@ def extract_text(data: Dict[str, object]) -> str:
     return "\n".join(parts)
 
 
+def _is_phantom_completion(data: Dict[str, object]) -> bool:
+    if data.get("status") != "completed" or extract_text(data):
+        return False
+    u = data.get("usage") or {}
+    return not data.get("output") and int((u or {}).get("total_tokens") or 0) == 0
+
+
 def extract_cost(data: Dict[str, object]) -> Optional[float]:
     u = data.get("usage") or {}
     cost = u.get("cost") if isinstance(u, dict) else None
@@ -186,10 +194,33 @@ class PerplexityAgentProvider:
                                    temperature=temperature, cache_key=cache_key, background=self.background,
                                    reasoning_effort=self.reasoning_effort)
         t0 = time.time()
-        data = self._http("POST", self.url, json.dumps(body).encode())
-        if self.background and data.get("status") in ("queued", "in_progress") and data.get("id"):
-            data = self._poll(str(data["id"]), t0)
-        return self._to_completion(data, model, t0)
+        last: Optional[ProviderError] = None
+        for attempt in range(self.max_retries + 1):
+            # A nonce per submission: the Agent API de-duplicates identical stored requests and
+            # returned the same phantom response id for a resubmission (23 Sep 2026).
+            body["metadata"] = {"nonce": uuid.uuid4().hex, "attempt": str(attempt)}
+            payload = json.dumps(body).encode()
+            data = self._http("POST", self.url, payload)
+            if self.background and data.get("status") in ("queued", "in_progress") and data.get("id"):
+                data = self._poll(str(data["id"]), t0)
+            if _is_phantom_completion(data):
+                # "completed" with no output and zero tokens: a backend failure reported as success
+                # (seen 23 Sep 2026). Unbilled. Re-read once in case the output was still being
+                # attached, then resubmit.
+                if self.background and data.get("id"):
+                    time.sleep(self.poll_s)
+                    try:
+                        data = self._poll(str(data["id"]), t0)
+                    except ProviderError:
+                        pass
+                if _is_phantom_completion(data):
+                    last = ProviderError(f"phantom completion (no output, zero tokens): {json.dumps(diagnostics(data))[:600]}", raw=data)
+                    if attempt < self.max_retries:
+                        time.sleep(5.0 * (2 ** attempt))
+                        continue
+                    raise last
+            return self._to_completion(data, model, t0)
+        raise last or ProviderError("unknown provider failure")
 
     def _to_completion(self, data: Dict[str, object], model: str, t0: float) -> Completion:
         text = extract_text(data)
