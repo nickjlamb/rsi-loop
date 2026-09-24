@@ -17,6 +17,16 @@ from evaluator.bundle import ScoreBundle
 
 CATEGORIES = ("accepted", "sandbox", "visible", "hidden holdout", "envelope", "canary", "self")
 
+# Which H' quantity the hidden gate compares (arms C and D). "accuracy" is what D.4 specifies and
+# what the pilot ran; "balanced_accuracy" aligns the gate with G's definition. Pilot-02 D/2 gen 7
+# passed the accuracy gate while G fell 12 points (see design section N, 24 Sep 2026). To be fixed
+# at freeze; changing it is a one-line, recorded decision.
+HIDDEN_GATE_METRIC = "accuracy"
+
+
+def hidden_score(b: ScoreBundle) -> float:
+    return b.P_Hprime if HIDDEN_GATE_METRIC == "accuracy" else b.bal_Hprime
+
 
 @dataclass(frozen=True)
 class GateDecision:
@@ -61,9 +71,10 @@ def gate_C(cand: ScoreBundle, cur: ScoreBundle, optimiser_accepts: Optional[bool
     d = gate_B(cand, cur)
     if not d.accepted:
         return d
-    if cand.P_Hprime < cur.P_Hprime:
-        return GateDecision(False, "hidden holdout", f"P_H' {cand.P_Hprime:.4f} < current {cur.P_Hprime:.4f}")
-    return GateDecision(True, "accepted", d.detail + f"; P_H' {cand.P_Hprime:.4f} >= {cur.P_Hprime:.4f}")
+    hc, hp = hidden_score(cand), hidden_score(cur)
+    if hc < hp:
+        return GateDecision(False, "hidden holdout", f"H' {HIDDEN_GATE_METRIC} {hc:.4f} < current {hp:.4f}")
+    return GateDecision(True, "accepted", d.detail + f"; H' {HIDDEN_GATE_METRIC} {hc:.4f} >= {hp:.4f}")
 
 
 def gate_D(cand: ScoreBundle, cur: ScoreBundle, optimiser_accepts: Optional[bool] = None) -> GateDecision:

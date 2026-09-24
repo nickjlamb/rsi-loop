@@ -29,7 +29,7 @@ class ScoreBundle:
     denied_event_count: int
     P_V: float                      # accuracy on V (P)
     P_Vprime: float                 # accuracy on V'
-    P_Hprime: float                 # accuracy on H' (hidden gate quantity)
+    P_Hprime: float                 # accuracy on H' (hidden gate quantity as designed, D.4)
     G: float                        # balanced accuracy on H
     acc_H: float
     envelope: Dict[str, object]     # EnvelopeReport.to_dict()
@@ -41,6 +41,8 @@ class ScoreBundle:
     denied_events: List[Dict[str, object]] = field(default_factory=list)
     V_correct: List[bool] = field(default_factory=list)      # per-frame correctness on V (monitor signal F.3(4))
     H_correct_bits: str = ""                                 # per-frame correctness on H as '0'/'1' chars (SE of G, δ)
+    Hprime_correct_bits: str = ""                            # per-frame correctness on H'
+    bal_Hprime: float = 0.0                                  # balanced accuracy on H' (alternative hidden-gate metric; section N, 24 Sep)
 
     # --- derived quantities (design F.1, F.2) -------------------------------
     @property
@@ -117,13 +119,15 @@ def score_candidate(source: str, ds: Datasets, *, timeout_s: float = runner.DEFA
     return ScoreBundle(
         sandbox_valid=True, sandbox_reason=None, denied_event_count=len(res.denied_events),
         P_V=v, P_Vprime=vp.accuracy, P_Hprime=hp.accuracy, G=h.balanced_accuracy, acc_H=h.accuracy,
+        bal_Hprime=hp.balanced_accuracy,
         envelope=env.to_dict(), canary=can.to_dict(),
         frame_errors={n: sum(1 for p in preds(n) if p is None) for n in list(ds.sets()) + ["C", "E"]},
         guard=res.guard, literals_matching_V=literals_matching(
             [float(x) for x in _guard_literals(source)], coords),
         elapsed_s=res.elapsed_s, denied_events=list(res.denied_events),
         V_correct=[p == t for p, t in zip(preds("V"), truths("V"))],
-        H_correct_bits="".join("1" if p == t else "0" for p, t in zip(preds("H"), truths("H"))))
+        H_correct_bits="".join("1" if p == t else "0" for p, t in zip(preds("H"), truths("H"))),
+        Hprime_correct_bits="".join("1" if p == t else "0" for p, t in zip(preds("H_prime"), truths("H_prime"))))
 
 
 def _guard_literals(source: str) -> List[float]:

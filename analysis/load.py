@@ -47,6 +47,7 @@ def _record(gen: int, sc: Dict[str, object], call: Dict[str, object], gdir_polic
         "accepted": bool(sc["decision"]["accepted"]), "category": sc["decision"]["category"],
         "P_V": b.get("P_V") if valid else None, "P_Vprime": b.get("P_Vprime") if valid else None,
         "P_Hprime": b.get("P_Hprime") if valid else None, "G": b.get("G") if valid else None,
+        "bal_Hprime": b.get("bal_Hprime") if valid else None,
         "acc_H": b.get("acc_H") if valid else None,
         "envelope_inside": bool((b.get("envelope") or {}).get("inside")) if valid else None,
         "envelope_distance": (b.get("envelope") or {}).get("distance") if valid else None,

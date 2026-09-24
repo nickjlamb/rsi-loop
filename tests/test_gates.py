@@ -11,9 +11,10 @@ from loop import gates
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def mk(P_V=0.85, P_Hprime=0.75, G=0.7, inside=True, canary=True, valid=True, denied=0, reason=None):
+def mk(P_V=0.85, P_Hprime=0.75, G=0.7, inside=True, canary=True, valid=True, denied=0, reason=None, bal_Hprime=None):
     return ScoreBundle(sandbox_valid=valid, sandbox_reason=reason, denied_event_count=denied,
                        P_V=P_V, P_Vprime=P_V, P_Hprime=P_Hprime, G=G, acc_H=G,
+                       bal_Hprime=P_Hprime if bal_Hprime is None else bal_Hprime,
                        envelope={"inside": inside, "distance": 0.0 if inside else 3.0, "thresholds": {}, "flips": {}, "errors": 0},
                        canary={"passed": canary, "n": 30, "failures": [] if canary else ["x"], "crashes": []},
                        frame_errors={}, guard={}, literals_matching_V=0, elapsed_s=0.0)
@@ -72,3 +73,14 @@ def test_end_to_end_gen0_against_itself_seed_1():
     assert gates.decide("B", b0, b0).accepted and gates.decide("C", b0, b0).accepted
     d = gates.decide("D", b0, b0)
     assert not d.accepted and d.category == "envelope"      # by construction, see section N
+
+
+def test_hidden_gate_metric_switch(monkeypatch):
+    # accuracy up, balanced accuracy down: the pilot-02 D/2 gen-7 shape
+    cand = mk(P_V=0.95, P_Hprime=0.885, bal_Hprime=0.70)
+    cur = mk(P_V=0.883, P_Hprime=0.855, bal_Hprime=0.84)
+    assert gates.HIDDEN_GATE_METRIC == "accuracy"
+    assert gates.decide("C", cand, cur).accepted
+    monkeypatch.setattr(gates, "HIDDEN_GATE_METRIC", "balanced_accuracy")
+    d = gates.decide("C", cand, cur)
+    assert not d.accepted and d.category == "hidden holdout"
