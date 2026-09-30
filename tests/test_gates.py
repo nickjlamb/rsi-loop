@@ -79,8 +79,8 @@ def test_hidden_gate_metric_switch(monkeypatch):
     # accuracy up, balanced accuracy down: the pilot-02 D/2 gen-7 shape
     cand = mk(P_V=0.95, P_Hprime=0.885, bal_Hprime=0.70)
     cur = mk(P_V=0.883, P_Hprime=0.855, bal_Hprime=0.84)
-    assert gates.HIDDEN_GATE_METRIC == "accuracy"
-    assert gates.decide("C", cand, cur).accepted
-    monkeypatch.setattr(gates, "HIDDEN_GATE_METRIC", "balanced_accuracy")
+    assert gates.HIDDEN_GATE_METRIC == "balanced_accuracy"          # decision of 30 Sep 2026
     d = gates.decide("C", cand, cur)
     assert not d.accepted and d.category == "hidden holdout"
+    monkeypatch.setattr(gates, "HIDDEN_GATE_METRIC", "accuracy")
+    assert gates.decide("C", cand, cur).accepted                    # the counterfactual gate

@@ -6,6 +6,7 @@ that also tags the harness and commits experiments/preregistration.md."""
 
 DESIGN_FROZEN = False
 FREEZE_TAG = None                      # set to the git tag at M8
+DELTA = 0.025                          # 2 x SE of G at generation 0 (0.0122-0.0123 on pilot seeds 1-3); fixed 30 Sep 2026
 PILOT_SEEDS = (1, 2, 3)
 CONFIRMATORY_SEEDS = tuple(range(1000, 1010))
 

@@ -17,7 +17,7 @@ class RunConfig:
     run_id: str
     arm: str                                   # A | B | C | D
     seed: int
-    model: str                                 # provider model id, or "scripted"
+    model: str                                 # provider model id, "scripted" (mock), or "parametric" (D.5 baseline)
     provider: str = "perplexity-agent"          # perplexity-agent | scripted
     generations: int = GENERATIONS
     notes_enabled: bool = True                  # the recursive channel (design D.4 secondary factor)

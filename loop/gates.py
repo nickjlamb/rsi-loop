@@ -17,11 +17,11 @@ from evaluator.bundle import ScoreBundle
 
 CATEGORIES = ("accepted", "sandbox", "visible", "hidden holdout", "envelope", "canary", "self")
 
-# Which H' quantity the hidden gate compares (arms C and D). "accuracy" is what D.4 specifies and
-# what the pilot ran; "balanced_accuracy" aligns the gate with G's definition. Pilot-02 D/2 gen 7
-# passed the accuracy gate while G fell 12 points (see design section N, 24 Sep 2026). To be fixed
-# at freeze; changing it is a one-line, recorded decision.
-HIDDEN_GATE_METRIC = "accuracy"
+# Which H' quantity the hidden gate compares (arms C and D). D.4 specified accuracy and the pilot
+# ran with it; pilot-02 D/2 revision 7 passed that gate while G fell 12 points. DECISION (N.L.,
+# 30 Sep 2026): balanced accuracy, so that arm C differs from arm B by hidden information alone
+# and not also by metric. The accuracy-gate counterfactual is a preregistered secondary analysis.
+HIDDEN_GATE_METRIC = "balanced_accuracy"
 
 
 def hidden_score(b: ScoreBundle) -> float:

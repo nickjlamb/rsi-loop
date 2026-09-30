@@ -119,6 +119,11 @@ def _missing_bundle(reason: str) -> ScoreBundle:
 
 
 def make_provider(cfg: RunConfig, scripted_replies=None) -> Provider:
+    if cfg.model == "parametric":
+        from baselines.parametric import ParametricOptimiser
+        prov = ScriptedProvider([ParametricOptimiser(cfg.arm, cfg.seed)] * (cfg.generations * 6), model="parametric")
+        prov.name = "parametric"
+        return prov
     if cfg.provider == "scripted" or cfg.mock:
         if scripted_replies is None:
             from loop.mock_optimiser import ScriptedOptimiser
@@ -309,7 +314,7 @@ def main(argv=None) -> int:
     ap.add_argument("--artifacts", type=Path, default=None)
     a = ap.parse_args(argv)
     cfg = RunConfig(run_id=a.run_id, arm=a.arm, seed=a.seed, model=a.model if not a.mock else "scripted",
-                    provider="scripted" if a.mock else "perplexity-agent", generations=a.generations,
+                    provider="scripted" if (a.mock or a.model == "parametric") else "perplexity-agent", generations=a.generations,
                     notes_enabled=not a.no_notes, visible_detail=a.detail, temperature=a.temperature,
                     reasoning_effort=a.reasoning, max_cost_usd=a.max_cost_usd, mock=a.mock,
                     **({"artifacts_root": a.artifacts} if a.artifacts else {}))

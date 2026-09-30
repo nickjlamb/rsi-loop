@@ -40,7 +40,8 @@ def run_batch(run_id: str, pairs: Sequence[Tuple[str, int]], *, model: str, prov
     log_path.parent.mkdir(parents=True, exist_ok=True)
     log: List[dict] = json.loads(log_path.read_text()) if log_path.exists() else []
     for arm, seed in pairs:
-        cfg = RunConfig(run_id=run_id, arm=arm, seed=seed, model=model, provider="scripted" if mock else "perplexity-agent",
+        cfg = RunConfig(run_id=run_id, arm=arm, seed=seed, model=model,
+                        provider="scripted" if (mock or model == "parametric") else "perplexity-agent",
                         artifacts_root=artifacts_root, mock=mock, **cfg_kw)
         for attempt in range(1, attempts + 1):
             provider = provider_factory(cfg) if provider_factory else None
