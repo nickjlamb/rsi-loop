@@ -61,6 +61,21 @@ def test_context_contains_no_hidden_information(Vp, report):
         assert "Acceptance rule" in c.system
 
 
+def test_leak_check_ignores_optimiser_authored_text_but_not_harness_text(Vp, report):
+    # Post-freeze defect (1 Oct 2026, confirm-01 C/1000): the optimiser's own vocabulary is not a leak.
+    src = GEN0 + "\n# a latent variable the simulator never showed me; theta_head is my guess\n"
+    c = context.build(arm="C", generation=6, current_source=src, notes="try the latent angle; roll_deg?",
+                      lineage=[], V_public=Vp, report=report)
+    assert "latent" in c.user and "roll_deg" in c.user          # echoed back to the optimiser, unchanged
+    # Harness-authored text is still scanned.
+    with pytest.raises(AssertionError, match="forbidden"):
+        context.build(arm="C", generation=6, current_source=GEN0, notes="", lineage=[], V_public=Vp,
+                      report=report, visible_eval_source="def f():\n    return theta_head\n")
+    with pytest.raises(AssertionError, match="forbidden"):
+        context.build(arm="C", generation=6, current_source=GEN0, notes="", lineage=[], V_public=Vp,
+                      report=dict(report, sandbox_reason="computed on H_prime"))
+
+
 def test_context_rejects_non_public_frames(ds1, report):
     with pytest.raises(AssertionError):
         context.build(arm="B", generation=1, current_source=GEN0, notes="", lineage=[],

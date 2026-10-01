@@ -27,7 +27,7 @@ class RunConfig:
     max_output_tokens: int = 32000              # reasoning tokens count against this; Sonnet 5 uses 12-16k per reply (pilot-02)
     reasoning_effort: Optional[str] = None       # None = API default; "low"/"medium"/"high" if ever set, recorded per trajectory
     temperature: Optional[float] = None         # None = provider default (Agent API default is 1)
-    max_cost_usd: float = 10.0                  # per-trajectory guard; halts with a recorded reason
+    max_cost_usd: float = 20.0                  # per-trajectory guard; halts with a recorded reason (10.0 until 1 Oct 2026, see design §N)
     artifacts_root: Path = ARTIFACTS_ROOT
     mock: bool = False                          # scripted provider: no spend, seed hygiene relaxed
 

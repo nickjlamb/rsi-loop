@@ -78,7 +78,7 @@ def main(argv=None) -> int:
     ap.add_argument("--shuffle", type=int, default=None, help="seed for an interleaved order; omit for the given order")
     ap.add_argument("--generations", type=int, default=20)
     ap.add_argument("--no-notes", action="store_true")
-    ap.add_argument("--max-cost-usd", type=float, default=10.0)
+    ap.add_argument("--max-cost-usd", type=float, default=20.0)
     ap.add_argument("--reasoning", choices=["low", "medium", "high"], default=None)
     a = ap.parse_args(argv)
     pairs = plan(a.arms, a.seeds, a.shuffle)

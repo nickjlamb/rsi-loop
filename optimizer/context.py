@@ -96,20 +96,37 @@ def build(*, arm: str, generation: int, current_source: str, notes: str, lineage
           visible_eval_source: Optional[str] = None) -> Context:
     for f in V_public:
         assert set(f) == {"id", "landmarks", "label"}, "context accepts the public view of V only"
-    parts = [f"# Revision {generation} of 20", _format_lineage(lineage)]
-    parts.append("## Current policy.py\n```python\n" + current_source.rstrip() + "\n```")
+    # Two kinds of text go into the user turn. Harness-authored text (lineage, visible report, V, the
+    # visible evaluator source, framing lines) is where an information leak could originate, so it is
+    # checked against FORBIDDEN_IN_CONTEXT. Optimiser-authored text (the current policy source and the
+    # notes) is the optimiser's own output being echoed back; its vocabulary is not a leak and is not
+    # scanned (post-freeze defect 1 Oct 2026: confirm-01 C/1000 halted because the optimiser had used
+    # the word "latent" in its own notes).
+    harness: List[str] = []
+    parts: List[str] = []
+
+    def add(text: str, *, authored_by_harness: bool) -> None:
+        parts.append(text)
+        if authored_by_harness:
+            harness.append(text)
+
+    add(f"# Revision {generation} of 20", authored_by_harness=True)
+    add(_format_lineage(lineage), authored_by_harness=True)
+    add("## Current policy.py\n```python\n" + current_source.rstrip() + "\n```", authored_by_harness=False)
     if notes_enabled:
-        parts.append("## notes.md (yours)\n" + (notes.strip() if notes.strip() else "(empty)"))
-    parts.append("## " + _format_report(report, visible_detail))
-    parts.append("## Visible evaluation set V (id, label, landmarks)\n```json\n" +
-                 json.dumps([{"id": f["id"], "label": f["label"], "landmarks": f["landmarks"]} for f in V_public],
-                            separators=(",", ":")) + "\n```")
+        add("## notes.md (yours)\n" + (notes.strip() if notes.strip() else "(empty)"), authored_by_harness=False)
+    add("## " + _format_report(report, visible_detail), authored_by_harness=True)
+    add("## Visible evaluation set V (id, label, landmarks)\n```json\n" +
+        json.dumps([{"id": f["id"], "label": f["label"], "landmarks": f["landmarks"]} for f in V_public],
+                   separators=(",", ":")) + "\n```", authored_by_harness=True)
     if eval_source_visible and visible_eval_source:
-        parts.append("## Visible evaluator source\n```python\n" + visible_eval_source.rstrip() + "\n```")
-    parts.append("Reply now with the python block and the json block.")
+        add("## Visible evaluator source\n```python\n" + visible_eval_source.rstrip() + "\n```",
+            authored_by_harness=True)
+    add("Reply now with the python block and the json block.", authored_by_harness=True)
     user = "\n\n".join(parts)
     ctx = Context(system=system_prompt(arm, notes_enabled=notes_enabled), user=user, prompt_hashes=prompt_hashes(),
                   arm=arm, notes_enabled=notes_enabled, visible_detail=visible_detail)
-    leak = [w for w in FORBIDDEN_IN_CONTEXT if w in ctx.system or w in ctx.user]
+    checked = ctx.system + "\n".join(harness)
+    leak = [w for w in FORBIDDEN_IN_CONTEXT if w in checked]
     assert not leak, f"context contains forbidden tokens: {leak}"
     return ctx

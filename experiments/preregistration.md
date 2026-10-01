@@ -91,3 +91,11 @@ Under arm B with the release criterion, the optimiser reached P_V = 1.0 by speci
 ## 12. Data and code availability
 
 All artifacts (every prompt, completion, policy, score and decision) are archived with the paper; the harness is MIT-licensed at github.com/nickjlamb/rsi-loop; datasets are regenerable from seed and manifest.
+
+## 13. Post-freeze defects log
+
+Entries after the freeze commit. A defect is a harness fault that stops or corrupts a trajectory; the fix is recorded, no frozen quantity changes, and affected trajectories are resumed, never re-run from revision 1.
+
+- **1 Oct 2026, defect 1.** Information-boundary assertion in `optimizer/context.build` also scanned optimiser-authored text (policy source, notes). confirm-01 C/1000 halted at revision 6 when the optimiser wrote "latent" in its notes. Fix: scan harness-authored text only; test added. Resumed from revision 6. Prompt hashes unchanged. Detail in design §N.
+- **1 Oct 2026, defect 2.** Per-trajectory cost guard of $10 (an operational limit, not a frozen quantity) stopped D/1009 at revision 16. Raised to $20; resumed from revision 17. Detail in design §N.
+

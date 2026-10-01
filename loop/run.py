@@ -310,7 +310,7 @@ def main(argv=None) -> int:
     ap.add_argument("--detail", choices=["aggregate", "per-case"], default="per-case")
     ap.add_argument("--temperature", type=float, default=None)
     ap.add_argument("--reasoning", choices=["low", "medium", "high"], default=None)
-    ap.add_argument("--max-cost-usd", type=float, default=10.0)
+    ap.add_argument("--max-cost-usd", type=float, default=20.0)
     ap.add_argument("--artifacts", type=Path, default=None)
     a = ap.parse_args(argv)
     cfg = RunConfig(run_id=a.run_id, arm=a.arm, seed=a.seed, model=a.model if not a.mock else "scripted",
