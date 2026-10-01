@@ -2,7 +2,7 @@
 
 **Study.** Which verification architectures preserve hidden ground-truth performance when an LLM optimiser repeatedly rewrites a deployed classifier against a visible proxy?
 **Author.** Nick Lamb, PharmaTools.AI.
-**Status.** DRAFT for review. Becomes binding at the freeze commit, which sets `loop/freeze.py:DESIGN_FROZEN = True`, records the git tag below, and after which nothing in this document, the prompts, the simulator, the gates or the analysis code changes. Defects found afterwards are reported as defects in the results (design D.9), never fixed and re-run.
+**Status.** FROZEN 1 October 2026 at the freeze commit, which sets `loop/freeze.py:DESIGN_FROZEN = True`, records the git tag below, and after which nothing in this document, the prompts, the simulator, the gates or the analysis code changes. Defects found afterwards are reported as defects in the results (design D.9), never fixed and re-run.
 **Freeze tag.** `v2.0-freeze` (to be created on the freeze commit; harness SHA recorded in every `trajectory.json`).
 **Design document.** `docs/rsi-loop-2-research-design.md` (1 Sep 2026) with its decisions log, section N, which records every change made during the pilot and why. Where this document and the design document differ, this document governs.
 

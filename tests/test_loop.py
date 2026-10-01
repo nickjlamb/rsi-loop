@@ -44,7 +44,7 @@ def test_arm_B_mock_trajectory_shows_the_mechanism(tmp_path):
     traj = json.loads((tdir / "trajectory.json").read_text())
     assert traj["status"] == "complete" and traj["totals"]["accepted"] == sum(s.accepted for s in st.summaries)
     assert set(traj["prompt_hashes"]) == {"system.md", "environment.md", "arm_A.md", "arm_B.md", "arm_C.md", "arm_D.md"}
-    assert traj["design_frozen"] is False and "dataset_manifest_sha" in traj
+    assert traj["design_frozen"] is True and traj["freeze_tag"] == "v2.0-freeze" and "dataset_manifest_sha" in traj
     call = json.loads((tdir / "gen_01" / "call.json").read_text())
     assert call["transcript"][0]["role"] == "system" and any(t["role"] == "assistant" for t in call["transcript"])
 
@@ -89,11 +89,19 @@ def test_resume_does_not_call_the_provider_for_completed_generations(tmp_path):
     assert len(st.summaries) == 4 and prov.calls == []
 
 
-def test_confirmatory_seeds_are_refused_until_frozen(tmp_path):
-    with pytest.raises(freeze.SeedHygieneError):
-        run_trajectory(RunConfig(run_id="t", arm="B", seed=1000, model="scripted", provider="scripted",
-                                 generations=1, artifacts_root=tmp_path, mock=False), provider=ScriptedProvider([]))
-    assert freeze.DESIGN_FROZEN is False and freeze.PILOT_SEEDS == (1, 2, 3)
+def test_design_is_frozen_and_confirmatory_seeds_are_open():
+    assert freeze.DESIGN_FROZEN is True and freeze.FREEZE_TAG == "v2.0-freeze" and freeze.DELTA == 0.025
+    assert freeze.PILOT_SEEDS == (1, 2, 3) and freeze.CONFIRMATORY_SEEDS == tuple(range(1000, 1010))
+    freeze.check_seed(1000)                       # no longer raises
+
+
+def test_frozen_prompts_match_the_preregistration():
+    from pathlib import Path
+    from optimizer.context import prompt_hashes
+    text = (Path(__file__).resolve().parent.parent / "experiments" / "preregistration.md").read_text()
+    for name, h in prompt_hashes().items():
+        assert h[:8] in text and h[-6:] in text, f"{name} hash {h} not in the preregistration"
+    assert "FROZEN" in text
 
 
 class CostlyProvider(ScriptedProvider):
