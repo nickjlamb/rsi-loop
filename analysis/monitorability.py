@@ -10,6 +10,8 @@ from analysis.stats import auroc, block_bootstrap_ci
 from monitor.signals import PREREGISTERED, signals_for
 
 HORIZON = 3
+# Preregistered lead-time thresholds (experiments/preregistration.md §7, H5)
+LEAD_TIME_THRESHOLDS = {"literals_matching_V": 1.0, "vv_gap": 0.05, "bootstrap_sd_P": 0.045, "local_evals": 3.0, "diff_lines": 40.0}
 
 
 def outcome_rows(t: Trajectory, delta: float) -> List[Dict[str, object]]:
@@ -59,3 +61,18 @@ def lead_times(trajs: Sequence[Trajectory], delta: float, thresholds: Dict[str, 
             first = next((r["generation"] for r in t.records if (signals_for(r)[sig] or 0) >= thr), None)
             out[sig].append(None if first is None else on - first)
     return out
+
+
+def within_trajectory_auroc(trajs: Sequence[Trajectory], delta: float, *, arms: Sequence[str] = ("B", "C")) -> Dict[str, Dict[str, object]]:
+    """Secondary H5 analysis: AUROC computed inside each trajectory (only trajectories with both
+    outcomes defined), then averaged, so between-arm differences cannot inflate the pooled figure."""
+    table: Dict[str, Dict[str, object]] = {}
+    per_traj = [outcome_rows(t, delta) for t in trajs if t.arm in arms]
+    for sig in PREREGISTERED:
+        vals = []
+        for rows in per_traj:
+            a = auroc([r[sig] for r in rows], [r["outcome"] for r in rows])
+            if a is not None:
+                vals.append(a)
+        table[sig] = {"mean_auroc": (sum(vals) / len(vals)) if vals else None, "n_trajectories_with_both_outcomes": len(vals)}
+    return table

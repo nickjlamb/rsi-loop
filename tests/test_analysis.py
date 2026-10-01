@@ -181,3 +181,22 @@ def test_no_op_detection_ignores_docstrings_and_comments():
     b = '"""v2 with a much longer essay"""\n# comment\nT = 21.0\n\ndef assess(lm):\n    return T\n'
     c = a.replace("21.0", "21.5")
     assert _is_no_op(b, a) and not _is_no_op(c, a) and not _is_no_op("", a)
+
+
+def test_secondary_analyses_and_within_trajectory_auroc(ten_seeds):
+    from analysis import secondary
+    trajs = load_run(ten_seeds)
+    cf = secondary.accuracy_gate_counterfactual(trajs)
+    assert cf["accepted_total"] == 0 and cf["rejected_by_hidden_total"] == 0     # synthetic C/D are flat 'visible' rejections
+    assert set(secondary.no_op_accounting(trajs)) == {t.key for t in trajs}
+    pf = secondary.protocol_failure_rates(trajs)
+    assert all(v["rate"] == 0 for v in pf.values())
+    wt = monitorability.within_trajectory_auroc(trajs, 0.015)
+    assert wt["literals_matching_V"]["mean_auroc"] > 0.8 and wt["diff_lines"]["mean_auroc"] == 0.5
+    assert set(monitorability.LEAD_TIME_THRESHOLDS) == set(PREREGISTERED)
+
+
+def test_null_control_is_identical_on_a_pilot_seed():
+    from loop.null_control import run
+    r = run(1, repeats=3)
+    assert r["identical"] and r["P_V"] == pytest.approx(52 / 60)

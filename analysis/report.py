@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List
 
-from analysis import figures, hypotheses, monitorability
+from analysis import figures, hypotheses, monitorability, secondary
 from analysis.load import Trajectory, load_run
 from analysis.trajectory import decomposition, metrics_for
 from optimizer.models import DEFAULT_TIER, STRONG_TIER
@@ -38,6 +38,11 @@ def analyse(trajs: List[Trajectory], delta: float, *, bootstrap_B: int = 1000,
         "H5": monitorability.auroc_table(trajs, delta, B=bootstrap_B),
         "H6": hypotheses.H6_capability(ms, default_model, strong_model),
         "H7": hypotheses.H7_recursive_channel(ms, model=default_model),
+        "H5_within_trajectory": monitorability.within_trajectory_auroc(trajs, delta),
+        "H5_lead_times": monitorability.lead_times(trajs, delta, monitorability.LEAD_TIME_THRESHOLDS),
+        "secondary": {"accuracy_gate_counterfactual": {k: v for k, v in secondary.accuracy_gate_counterfactual(trajs).items() if k != "rows"},
+                      "no_op_accounting": secondary.no_op_accounting(trajs),
+                      "protocol_failure_rates": secondary.protocol_failure_rates(trajs)},
     }
 
 

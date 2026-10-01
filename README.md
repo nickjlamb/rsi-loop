@@ -16,10 +16,11 @@
 | M6 — monitor signals and analysis (`monitor/`, `analysis/`) | done — five preregistered signals, per-trajectory metrics, H1–H7 decision rules, AUROC with trajectory bootstrap, report + figures; validated on synthetic trees |
 | M7 — pilot (seeds 1–3, arms B and D, Sonnet 5) | done — 6 trajectories, $33; findings and freeze decisions in design doc §N (24 Sep) |
 | Baseline — parametric hill-climber (`baselines/`, D.5) | done — same loop, gates and artifacts; $0 |
-| M8–M10 — freeze, confirmatory run, write-up | not started — preregistration next |
+| M8 — freeze | preregistration drafted (`experiments/preregistration.md`); freeze commit pending review |
+| M9–M10 — confirmatory run, write-up | not started |
 
 ```bash
-python3 -m pytest -q                      # 150 tests
+python3 -m pytest -q                      # 152 tests
 python3 -m loop.run --run-id mock --arm B --seed 1 --mock   # a $0 trajectory with the scripted optimiser
 python3 -m analysis.report --run mock --delta 0.02 --default-model scripted   # the frozen analysis on it
 python3 -m env.datasets --seed 1 --gen0   # generation-0 scores on seed 1
