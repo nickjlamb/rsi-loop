@@ -61,3 +61,31 @@ def protocol_failure_rates(trajs: Sequence[Trajectory]) -> Dict[str, Dict[str, o
     for d in out.values():
         d["rate"] = d["protocol_failures"] / d["proposals"] if d["proposals"] else None
     return out
+
+
+def baseline_contrast(ms: Sequence, *, llm_model: str, baseline_model: str = "parametric") -> Dict[str, Dict[str, object]]:
+    """Preregistered secondary analysis 6: the parametric hill-climber against the LLM, per arm, descriptively.
+    Reports per-arm means of G_AUC, G_final, Δ_final, accepted changes and proposal envelope-violation rate for
+    both optimisers, and the paired (by seed) HL estimate of LLM − baseline on G_AUC and G_final."""
+    from analysis.stats import hodges_lehmann
+    out: Dict[str, Dict[str, object]] = {}
+    for arm in "ABCD":
+        llm = {m.seed: m for m in ms if m.arm == arm and m.model == llm_model and m.notes_enabled}
+        base = {m.seed: m for m in ms if m.arm == arm and m.model == baseline_model}
+        if not llm or not base:
+            continue
+        def mean(d, attr):
+            xs = [getattr(m, attr) for m in d.values() if getattr(m, attr) is not None]
+            return (sum(xs) / len(xs)) if xs else None
+        seeds = sorted(set(llm) & set(base))
+        row: Dict[str, object] = {"n_llm": len(llm), "n_baseline": len(base), "paired_seeds": len(seeds)}
+        for attr in ("G_AUC", "G_final", "delta_final", "accepted_changes", "proposal_envelope_violation_rate"):
+            row[f"llm_{attr}"] = mean(llm, attr)
+            row[f"baseline_{attr}"] = mean(base, attr)
+        for attr in ("G_AUC", "G_final"):
+            diffs = [getattr(llm[s], attr) - getattr(base[s], attr) for s in seeds
+                     if getattr(llm[s], attr) is not None and getattr(base[s], attr) is not None]
+            row[f"llm_minus_baseline_{attr}_hl"] = hodges_lehmann(diffs) if diffs else None
+        out[arm] = row
+    return out
+

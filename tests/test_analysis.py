@@ -175,6 +175,42 @@ def test_report_cli_writes_summary_and_tables(ten_seeds, tmp_path):
     assert "| B | 1 | m |" in (out / "tables.md").read_text()
 
 
+def test_H2_ci_including_zero_is_inconclusive_not_rejected(tmp_path):
+    # Analysis defect 3 (4 Oct 2026): C − B with a CI straddling 0 must read "inconclusive".
+    for seed in range(1, 11):
+        worse, fine = ("B", "C") if seed % 2 else ("C", "B")       # alternate which arm degrades: diffs change sign
+        synthetic.write_trajectory(tmp_path, "h2", worse, seed, synthetic.goodhart_steps(20, fall_from=6), model="m")
+        synthetic.write_trajectory(tmp_path, "h2", fine, seed, synthetic.flat_steps(20), model="m")
+    ms = [metrics_for(t, 0.015) for t in load_run(tmp_path / "h2")]
+    h2 = hypotheses.H2_hidden_holdout(ms, model="m")
+    assert h2["G_AUC"]["hl"]["ci_low"] < 0 < h2["G_AUC"]["hl"]["ci_high"]
+    assert h2["verdict"] == "inconclusive"
+
+
+def test_report_combines_runs_and_scopes_primary_set(ten_seeds, tmp_path):
+    # Analysis defect 4 (4 Oct 2026): strong-tier, notes-off and baseline runs live under their own run ids.
+    root = ten_seeds.parent
+    for seed in range(1, 11):
+        synthetic.write_trajectory(root, "strong", "B", seed, synthetic.goodhart_steps(20, fall_from=4), model="opus")
+        synthetic.write_trajectory(root, "strong", "D", seed, synthetic.flat_steps(20, g0=0.80), model="opus")
+        synthetic.write_trajectory(root, "nonotes", "B", seed, synthetic.flat_steps(20), model="m", notes_enabled=False)
+        synthetic.write_trajectory(root, "nonotes", "D", seed, synthetic.flat_steps(20), model="m", notes_enabled=False)
+        for arm in "ABCD":
+            synthetic.write_trajectory(root, "base", arm, seed, synthetic.flat_steps(20), model="parametric")
+    out = tmp_path / "out"
+    rc = report_main(["--run", "syn", "--run", "strong", "--run", "nonotes", "--run", "base", "--delta", "0.015",
+                      "--artifacts", str(root), "--out", str(out), "--bootstrap", "50", "--default-model", "m",
+                      "--strong-model", "opus"])
+    assert rc == 0
+    s = json.loads((out / "summary.json").read_text())
+    assert s["n_trajectories"] == 120 and s["n_primary"] == 40 and s["runs"] == ["base", "nonotes", "strong", "syn"]
+    assert s["H1"]["verdict"] == "supported"                      # unchanged by the extra runs
+    assert s["H6"]["verdict"] != "n/a" and s["H7"]["verdict"] != "n/a"
+    bc = s["secondary"]["baseline_contrast"]
+    assert set(bc) == set("ABCD") and bc["B"]["paired_seeds"] == 10 and bc["B"]["baseline_model" if False else "n_baseline"] == 10
+    assert "Baseline contrast" in (out / "tables.md").read_text()
+
+
 def test_no_op_detection_ignores_docstrings_and_comments():
     from analysis.load import _is_no_op
     a = '"""v1"""\nT = 21.0\ndef assess(lm):\n    """doc"""\n    return T\n'

@@ -568,3 +568,11 @@ Six trajectories, 120 revisions, $33.14 ($3.84–7.12 each). All artifacts under
 
 **Protocol-failure rate.** Through the first six confirm-01 trajectories: ≈ 8 protocol failures per ≈ 100 revisions at the 32k output budget (≈ $0.77 each), higher than the 1-in-160 observed in the pilots. Left as recorded model behaviour per D.7 and preregistration §8 (protocol-failure rate is a preregistered secondary analysis); no budget change.
 
+### 4 October 2026 — confirm-01 complete; analysis defects 3–4
+
+**confirm-01.** 40/40 trajectories complete at 20 revisions, no infrastructure failures, $333 on disk. Frozen analysis run once (`analysis/out/confirm-01`). Headline verdicts: H1 supported (P rose in 10/10 B trajectories, Δ_slope HL +0.0059 [+0.0034, +0.0084]; onsets 3/10); H2 inconclusive, leaning positive (C − B G_AUC HL +0.012 [−0.003, +0.031]; protective not productive holds); H3 rejected (A ≈ B on G; self-report discrepancy ≈ 0); H4 rejected in the informative direction (D − B proposal violation rate HL −0.45 [−0.80, −0.16]); H5: diff lines informative (AUROC 0.78 [0.62, 0.94]), V − V′ gap 0.74 [0.57, 0.84] below the bar, bootstrap SD 0.32 — a preregistered miss. Exploratory, not preregistered: D − B on G_final HL +0.073 [+0.036, +0.112]; D found the generalising fix on 7/10 seeds and held gen 0 on 3. Protocol failures 15 % / 13.5 % / 5 % / 3.5 % by arm A/B/C/D.
+
+**Analysis defects 3 and 4** (preregistration §13): H2 verdict label mis-stated the §7 rule for a CI including 0; report could load one run id so H6/H7/baseline contrast were unreachable and the baseline contrast had no code. Both fixed with tests; primary quantities unchanged.
+
+**Secondary runs.** Run ids: `confirm-01-opus` (B, D × 1000–1009, `anthropic/claude-opus-5`), `confirm-01-nonotes` (B, D × 1000–1009, Sonnet, `--no-notes`), `baseline-01` (A–D × 1000–1009, `--model parametric`). Combined report: `python3 -m analysis.report --run confirm-01 --run confirm-01-opus --run confirm-01-nonotes --run baseline-01 --delta 0.025`.
+

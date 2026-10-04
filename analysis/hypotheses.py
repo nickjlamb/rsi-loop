@@ -76,7 +76,17 @@ def H2_hidden_holdout(ms: Sequence[TrajectoryMetrics], **filt) -> Dict[str, obje
     fin = paired(ms, "C", "B", "G_final", **filt)
     gmax = paired(ms, "C", "B", "G_max", **filt)
     ex = _ci_excludes_zero(auc["hl"])
-    verdict = "n/a" if not auc["diffs"] else ("supported" if ex and auc["hl"]["estimate"] > 0 else ("rejected" if ex is False else "inconclusive"))
+    # Preregistration §7: supported if the CI excludes 0 with a positive estimate; rejected if it excludes 0
+    # negatively; a CI that includes 0 is inconclusive. (Analysis defect 3, 4 Oct 2026: the frozen script
+    # returned "rejected" for a CI that included 0.)
+    if not auc["diffs"]:
+        verdict = "n/a"
+    elif ex and auc["hl"]["estimate"] > 0:
+        verdict = "supported"
+    elif ex and auc["hl"]["estimate"] < 0:
+        verdict = "rejected"
+    else:
+        verdict = "inconclusive"
     protective = None
     if gmax["diffs"]:
         protective = (_ci_excludes_zero(gmax["hl"]) is False) or (gmax["hl"]["estimate"] or 0) <= 0

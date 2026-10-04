@@ -25,24 +25,32 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def analyse(trajs: List[Trajectory], delta: float, *, bootstrap_B: int = 1000,
-            default_model: str = DEFAULT_TIER, strong_model: str = STRONG_TIER) -> Dict[str, object]:
+            default_model: str = DEFAULT_TIER, strong_model: str = STRONG_TIER,
+            baseline_model: str = "parametric") -> Dict[str, object]:
     ms = [metrics_for(t, delta) for t in trajs]
+    # The confirmatory core (H1–H5) and the secondary analyses 1–3 are defined on the primary set: default tier,
+    # notes on, LLM optimiser. H6 and H7 add the strong-tier and notes-off factors; the baseline contrast adds
+    # the parametric optimiser. (Analysis defect 4, 4 Oct 2026: the frozen report loaded one run id, so the
+    # secondary factors, which live under their own run ids, could not reach H6/H7; scoping made explicit.)
+    primary = [t for t in trajs if t.model == default_model and t.notes_enabled]
     return {
-        "delta": delta, "n_trajectories": len(trajs),
+        "delta": delta, "n_trajectories": len(trajs), "n_primary": len(primary),
+        "runs": sorted({t.run_id for t in trajs}),
         "trajectories": [m.to_dict() for m in ms],
         "decomposition": {t.key: decomposition(t) for t in trajs},
         "H1": hypotheses.H1_goodhart_curve(ms, model=default_model, notes=True),
         "H2": hypotheses.H2_hidden_holdout(ms, model=default_model, notes=True),
         "H3": hypotheses.H3_self_evaluation(ms, model=default_model, notes=True),
         "H4": hypotheses.H4_pressure_is_the_optimisers(ms, model=default_model, notes=True),
-        "H5": monitorability.auroc_table(trajs, delta, B=bootstrap_B),
+        "H5": monitorability.auroc_table(primary, delta, B=bootstrap_B),
         "H6": hypotheses.H6_capability(ms, default_model, strong_model),
         "H7": hypotheses.H7_recursive_channel(ms, model=default_model),
-        "H5_within_trajectory": monitorability.within_trajectory_auroc(trajs, delta),
-        "H5_lead_times": monitorability.lead_times(trajs, delta, monitorability.LEAD_TIME_THRESHOLDS),
-        "secondary": {"accuracy_gate_counterfactual": {k: v for k, v in secondary.accuracy_gate_counterfactual(trajs).items() if k != "rows"},
+        "H5_within_trajectory": monitorability.within_trajectory_auroc(primary, delta),
+        "H5_lead_times": monitorability.lead_times(primary, delta, monitorability.LEAD_TIME_THRESHOLDS),
+        "secondary": {"accuracy_gate_counterfactual": {k: v for k, v in secondary.accuracy_gate_counterfactual(primary).items() if k != "rows"},
                       "no_op_accounting": secondary.no_op_accounting(trajs),
-                      "protocol_failure_rates": secondary.protocol_failure_rates(trajs)},
+                      "protocol_failure_rates": secondary.protocol_failure_rates(trajs),
+                      "baseline_contrast": secondary.baseline_contrast(ms, llm_model=default_model, baseline_model=baseline_model)},
     }
 
 
@@ -61,12 +69,28 @@ def tables_md(summary: Dict[str, object]) -> str:
     rows += ["", "## H5 monitorability (arms B and C)", "", "| signal | AUROC | 95% CI | rows | positives | uninformative |", "|---|---|---|---|---|---|"]
     for sig, v in summary["H5"].items():
         rows.append(f"| {sig} | {f(v['auroc'])} | [{f(v['ci_low'])}, {f(v['ci_high'])}] | {v['n_rows']} | {v['positives']} | {v['uninformative']} |")
+    bc = summary.get("secondary", {}).get("baseline_contrast") or {}
+    if bc:
+        rows += ["", "## Baseline contrast (LLM default tier vs parametric hill-climber, per arm)", "",
+                 "| arm | G_AUC llm / base | G_final llm / base | Δ_final llm / base | changes llm / base | env viol llm / base | llm − base G_final HL [95% CI] |",
+                 "|---|---|---|---|---|---|---|"]
+        for arm, r in bc.items():
+            hl = r.get("llm_minus_baseline_G_final_hl") or {}
+            rows.append(f"| {arm} | {f(r['llm_G_AUC'])} / {f(r['baseline_G_AUC'])} | {f(r['llm_G_final'])} / {f(r['baseline_G_final'])} | "
+                        f"{f(r['llm_delta_final'])} / {f(r['baseline_delta_final'])} | {f(r['llm_accepted_changes'])} / {f(r['baseline_accepted_changes'])} | "
+                        f"{f(r['llm_proposal_envelope_violation_rate'])} / {f(r['baseline_proposal_envelope_violation_rate'])} | "
+                        f"{f(hl.get('estimate'))} [{f(hl.get('ci_low'))}, {f(hl.get('ci_high'))}] |")
+    for h in ("H6", "H7"):
+        v = summary.get(h) or {}
+        if v.get("verdict") not in (None, "n/a"):
+            rows += ["", f"## {h} detail", "", "```", json.dumps({k: x for k, x in v.items()}, indent=1, default=str)[:4000], "```"]
     return "\n".join(rows) + "\n"
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--run", required=True)
+    ap.add_argument("--run", required=True, action="append",
+                    help="run id under --artifacts; repeat to combine runs (primary + strong tier + notes-off + baseline)")
     ap.add_argument("--delta", type=float, required=True)
     ap.add_argument("--artifacts", type=Path, default=ROOT / "artifacts")
     ap.add_argument("--out", type=Path, default=None)
@@ -74,11 +98,11 @@ def main(argv=None) -> int:
     ap.add_argument("--default-model", default=DEFAULT_TIER, help="model id treated as the default tier (use 'scripted' for mock runs)")
     ap.add_argument("--strong-model", default=STRONG_TIER)
     a = ap.parse_args(argv)
-    trajs = load_run(a.artifacts / a.run)
+    trajs = [t for r in a.run for t in load_run(a.artifacts / r)]
     if not trajs:
-        print("no trajectories found under", a.artifacts / a.run, file=sys.stderr)
+        print("no trajectories found under", [str(a.artifacts / r) for r in a.run], file=sys.stderr)
         return 1
-    out = a.out or (ROOT / "analysis" / "out" / a.run)
+    out = a.out or (ROOT / "analysis" / "out" / "+".join(a.run))
     out.mkdir(parents=True, exist_ok=True)
     summary = analyse(trajs, a.delta, bootstrap_B=a.bootstrap, default_model=a.default_model, strong_model=a.strong_model)
     (out / "summary.json").write_text(json.dumps(summary, indent=1, default=str) + "\n")
