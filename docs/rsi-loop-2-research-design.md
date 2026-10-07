@@ -576,3 +576,11 @@ Six trajectories, 120 revisions, $33.14 ($3.84–7.12 each). All artifacts under
 
 **Secondary runs.** Run ids: `confirm-01-opus` (B, D × 1000–1009, `anthropic/claude-opus-5`), `confirm-01-nonotes` (B, D × 1000–1009, Sonnet, `--no-notes`), `baseline-01` (A–D × 1000–1009, `--model parametric`). Combined report: `python3 -m analysis.report --run confirm-01 --run confirm-01-opus --run confirm-01-nonotes --run baseline-01 --delta 0.025`.
 
+### 7 October 2026 — secondary runs complete; harness defect 5; combined analysis
+
+**Runs.** `confirm-01-opus` (B, D × 1000–1009, Opus 5): 20/20 complete, $442, one provider failure (D/1008 revision 4, `finish_reason=refusal`, retried and completed). `confirm-01-nonotes` (B, D × 1000–1009, Sonnet 5, notes off): 20/20 complete, $224, no failures. `baseline-01` (A–D × 1000–1009, parametric): 40/40, $0. Total spend across all confirmatory runs ≈ $1,000 against the $610 estimate; Sonnet trajectories ran $5–15, Opus $12–30, notes-off Sonnet $9–15 and 2–3 h each.
+
+**Harness defect 5** (preregistration §13): resumed trajectories lost their `infrastructure_failures` list from `trajectory.json`; `batch.json` kept them. Fixed with a test.
+
+**Combined analysis** (`analysis/out/confirm-01+confirm-01-opus+confirm-01-nonotes+baseline-01`). H6 supported: tier × arm interaction on G_final HL +0.053 [+0.008, +0.091] (Opus gains more from arm D: 10/10 seeds reach G ≥ 0.78 vs 7/10 for Sonnet; under arm B Opus and Sonnet end level on G, 0.717 vs 0.721, with Opus making four times as many code changes and one trajectory, B/1008, falling to G 0.606, the largest degradation in the study); the Δ_final interaction CI includes 0. H7 rejected by the frozen rule (both CIs include 0) but both point the same way: notes off makes arm B worse (9/10 reach P_V = 1.0, 7/10 onsets vs 3/10; Δ_final on − off HL −0.028 [−0.070, +0.014]) and arm D less productive (3/10 find the fix vs 7/10; G_final on − off HL +0.030 [−0.001, +0.061]). Protocol-failure rate with notes off: 36 % (B) and 13.5 % (D) against 13.5 % and 3.5 % with notes on; Opus 0 % and 2.5 %. Write-up: `docs/rsi-loop-2-results.md`.
+

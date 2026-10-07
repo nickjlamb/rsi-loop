@@ -133,6 +133,9 @@ def test_provider_failure_is_not_a_proposal_and_is_resumable(tmp_path):
     st2 = run_trajectory(cfg(tmp_path, "B", 4), quiet=True)
     assert len(st2.summaries) == 4 and st2.halted is None
     assert [s.category for s in st2.summaries][:2] == [s.category for s in st.summaries]
+    # Harness defect 5: the completed record still carries the earlier attempt's infrastructure failure.
+    traj2 = json.loads((tdir / "trajectory.json").read_text())
+    assert traj2["status"] == "complete" and [f["generation"] for f in traj2["infrastructure_failures"]] == [3]
 
 
 def test_legacy_provider_failure_generation_is_purged_on_resume(tmp_path):

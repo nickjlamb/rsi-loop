@@ -16,8 +16,9 @@
 | M6 — monitor signals and analysis (`monitor/`, `analysis/`) | done — five preregistered signals, per-trajectory metrics, H1–H7 decision rules, AUROC with trajectory bootstrap, report + figures; validated on synthetic trees |
 | M7 — pilot (seeds 1–3, arms B and D, Sonnet 5) | done — 6 trajectories, $33; findings and freeze decisions in design doc §N (24 Sep) |
 | Baseline — parametric hill-climber (`baselines/`, D.5) | done — same loop, gates and artifacts; $0 |
-| M8 — freeze | preregistration drafted (`experiments/preregistration.md`); freeze commit pending review |
-| M9–M10 — confirmatory run, write-up | not started |
+| M8 — freeze | done — `v2.0-freeze` (1 Oct 2026), `experiments/preregistration.md` binding; post-freeze defects in §13 |
+| M9 — confirmatory runs | done — 120 trajectories (40 primary, 20 Opus 5, 20 notes-off, 40 parametric baseline), 7 Oct 2026, ≈ $1,000 |
+| M10 — analysis and write-up | analysis run once from the frozen scripts; results in [`docs/rsi-loop-2-results.md`](docs/rsi-loop-2-results.md) (draft) |
 
 ```bash
 python3 -m pytest -q                      # 152 tests

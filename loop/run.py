@@ -165,6 +165,12 @@ def run_trajectory(cfg: RunConfig, provider: Optional[Provider] = None, *, quiet
             "provider": getattr(provider, "name", "unknown"), "gen0": {"P_V": b0.P_V, "P_Hprime": b0.P_Hprime, "G": b0.G,
                                                                         "envelope_inside": b0.envelope_inside},
             "generations": [], "totals": {}, "status": "running"}
+    # Harness defect 5 (7 Oct 2026): a resume rebuilt this record from scratch and dropped the
+    # infrastructure_failures of earlier attempts (batch.json kept them). Carry them forward.
+    if (tdir / "trajectory.json").exists():
+        prev = _load(tdir / "trajectory.json")
+        if prev.get("infrastructure_failures"):
+            traj["infrastructure_failures"] = list(prev["infrastructure_failures"])
     _dump(tdir / "trajectory.json", traj)
 
     for gen in range(1, cfg.generations + 1):
