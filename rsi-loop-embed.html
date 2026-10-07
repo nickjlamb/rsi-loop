@@ -229,6 +229,13 @@ display: block;
 width: 100%;
 height: auto;
 }
+.fig-frame { margin: 1.5rem 0 0.5rem; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; background: #fff; }
+.fig-frame img { display: block; width: 100%; height: auto; }
+.link-row { display: flex; flex-wrap: wrap; gap: 0.6rem 1.6rem; margin-top: 1.4rem; font-size: 0.88rem; }
+.link-row a { color: var(--teal); text-decoration: none; border-bottom: 1px solid var(--teal-light); }
+.link-row a:hover { border-bottom-color: var(--teal); }
+.lesson { margin-top: 1.6rem; padding: 1.2rem 1.4rem; background: var(--teal-light); border-radius: 6px; font-family: 'Newsreader', serif; font-size: 1.15rem; line-height: 1.5; color: var(--ink); }
+.lesson strong { font-weight: 600; }
 .demo-caption {
 font-size: 0.8rem;
 color: var(--muted);
@@ -576,7 +583,7 @@ html { font-size: 15px; }
 "name": "What does RSI mean in AI?",
 "acceptedAnswer": {
 "@type": "Answer",
-"text": "In AI, RSI stands for recursive self-improvement: a system that improves its own ability to improve — rewriting its own logic, tuning its own thresholds, or upgrading the very process it uses to get better. The RSI Loop is a small, inspectable prototype of the gate such a system would need, applied to a detector for the other RSI, repetitive strain injury. In the current version the changes to the detector were made by hand; a follow-up experiment adds the optimiser."
+"text": "In AI, RSI stands for recursive self-improvement: a system that improves its own ability to improve — rewriting its own logic, tuning its own thresholds, or upgrading the very process it uses to get better. The RSI Loop is a small, inspectable experiment on the gate such a system would need, applied to a detector for the other RSI, repetitive strain injury: an LLM rewrote the detector 20 times per run under four different acceptance gates, and only the gate that checked behaviour against a fixed physical specification let real improvement through."
 }
 },
 {
@@ -592,7 +599,7 @@ html { font-size: 15px; }
 "name": "Is recursive self-improvement dangerous?",
 "acceptedAnswer": {
 "@type": "Answer",
-"text": "Unbounded self-improvement is a core AI-safety concern: a system optimising itself against a narrow score can drift into behaviour its designers never intended. The RSI Loop sketches one mitigation pattern — a two-stage gate in which a candidate change must pass both an accuracy check and an independent auditor that holds the system inside clinically plausible bounds. Whether that gate holds against an optimiser that can rewrite the detector in full has not been tested in the current version; that is the follow-up experiment."
+"text": "Unbounded self-improvement is a core AI-safety concern: a system optimising itself against a narrow score can drift into behaviour its designers never intended. The RSI Loop tested this directly in October 2026. Under a gate that only required a visible score not to fall, Claude Sonnet 5 reached a perfect visible score in 7 of 10 runs by memorising the test set while hidden accuracy stayed flat or fell. A gate that also required correct behaviour on a fixed sweep of specified postures stopped the gaming and was the only architecture under which hidden accuracy rose."
 }
 },
 {
@@ -600,7 +607,7 @@ html { font-size: 15px; }
 "name": "What is the RSI Loop, concretely?",
 "acceptedAnswer": {
 "@type": "Answer",
-"text": "A Python prototype (about 1,150 lines) that detects repetitive-strain risk from posture landmarks, plus a two-stage acceptance gate. The v1 to v2 change that lifted benchmark accuracy from 90% to 100% was made by hand, with both thresholds inside gold-standard clinical ranges; there is no optimiser in the current code. A September 2026 audit found that the gate can be rewritten from inside the candidate's process, cannot distinguish a lookup table from a classifier, and cannot see that v2 is sensitive to camera roll."
+"text": "A Python harness (MIT-licensed) in which an LLM rewrites a posture-risk classifier for 20 revisions under one of four acceptance gates, with a seeded simulator defining the ground truth, a process-isolated sandbox, and a preregistered analysis. The October 2026 confirmatory run covered 120 trajectories with Claude Sonnet 5 and Claude Opus 5 plus a parametric baseline; every prompt, policy and gate decision is archived at Zenodo (DOI 10.5281/zenodo.23223679). The original 2025 version was a 1,150-line hand-made prototype of the gate; a September 2026 audit of it motivated the experiment."
 }
 },
 {
@@ -616,7 +623,7 @@ html { font-size: 15px; }
 "name": "What is RSI in machine learning?",
 "acceptedAnswer": {
 "@type": "Answer",
-"text": "In machine learning, RSI is recursive self-improvement: a system that takes part in improving itself, rather than being improved only by its developers. Ordinary training improves a model against a fixed objective, under a process the developers control. In recursive self-improvement, the system also modifies the improvement process itself — proposing new logic, tests or thresholds. That autonomy is what makes RSI powerful, and what makes independent verification essential."
+"text": "In machine learning, RSI is recursive self-improvement: a system that takes part in improving itself, rather than being improved only by its developers. Ordinary training improves a model against a fixed objective, under a process the developers control. In recursive self-improvement, the system also modifies the improvement process itself — proposing new logic, tests or thresholds. That autonomy is what makes RSI powerful, and what makes independent verification essential: in the RSI Loop experiment the optimiser and the verifier run in separate processes with separate information."
 }
 },
 {
@@ -638,13 +645,13 @@ html { font-size: 15px; }
 <header class="proj-hero">
 <div class="page-width">
 <span class="proj-kicker">Lab · Experiment</span>
-<h1>The RSI Loop: A Two-Stage Acceptance Gate for a <strong>Self-Modifying</strong> Detector</h1>
-<p class="proj-subtitle">Using RSI to solve RSI: a small, deterministic prototype of a gate that lets a detector change, but only inside a clinical envelope.</p>
-<p class="proj-definition"><strong>RSI, in AI, means recursive self-improvement</strong> — a system that improves its own ability to improve, by rewriting its own logic, tuning its own thresholds or upgrading the process it uses to get better. This page is a small, audited prototype of the gate such a system would need. <a href="#faq">Full definition and FAQ ↓</a></p>
+<h1>The RSI Loop: A Preregistered Test of Acceptance Gates for <strong>Self-Modifying</strong> Code</h1>
+<p class="proj-subtitle">We let an AI improve its own code 2,400 times. What it did depended entirely on who was checking.</p>
+<p class="proj-definition"><strong>RSI, in AI, means recursive self-improvement</strong> — a system that improves its own ability to improve, by rewriting its own logic, tuning its own thresholds or upgrading the process it uses to get better. This page reports a preregistered experiment on the gate such a system would need. <a href="#faq">Full definition and FAQ ↓</a></p>
 <div class="proj-meta">
-<span class="proj-meta-item">Stack <strong>Python · MediaPipe · rich</strong></span>
-<span class="proj-meta-item">Lines <strong>~1,150</strong></span>
-<span class="proj-meta-item">Status <strong>v2 — gate prototype · audited Sept 2026</strong></span>
+<span class="proj-meta-item">Optimisers <strong>Claude Sonnet 5 · Opus 5 · parametric</strong></span>
+<span class="proj-meta-item">Runs <strong>120 trajectories · 2,400 revisions</strong></span>
+<span class="proj-meta-item">Status <strong>Results published 7 Oct 2026 · <a href="https://doi.org/10.5281/zenodo.23223679" style="color:inherit">data DOI</a></strong></span>
 <span class="proj-meta-item">Author <strong>Nick Lamb</strong></span>
 </div>
 <div class="proj-ctas">
@@ -653,22 +660,33 @@ html { font-size: 15px; }
 View Source on GitHub
 <span aria-hidden="true">→</span>
 </a>
-<a class="btn-secondary" href="#demo">
-<span aria-hidden="true">▸</span>
-Watch the Narrated Demo
+<a class="btn-secondary" href="#findings">
+<span aria-hidden="true">↓</span>
+Read the Findings
 </a>
 </div>
 </div>
 </header>
-<section id="demo">
+<section id="findings">
 <div class="page-width">
-<p class="section-label"><span class="section-num">00</span>Demo</p>
-<h2 class="section-heading">The whole loop in 30 seconds</h2>
-<div class="section-body">
-<div class="demo-frame reveal">
-<img src="https://cdn.jsdelivr.net/gh/nickjlamb/rsi-loop@main/demo.gif" alt="Terminal recording: the v1 detector fails on radial wrist deviation at 90% accuracy, a narrative panel explains the hand-authored geometric fix, the v2 detector reaches 100%, the Auditor confirms thresholds are inside the Clinical Gold Standard, and the final status is COMPLETE." loading="lazy" decoding="async">
+<p class="section-label"><span class="section-num">00</span>What we found</p>
+<h2 class="section-heading">Four gatekeepers, four outcomes</h2>
+<div class="section-body reveal">
+<p class="lead">Imagine a small program that looks at a picture of someone at a desk and decides whether their posture is putting them at risk of a repetitive strain injury. Now hand it to an AI and say: make it better. Twenty times in a row, each time starting from the last version it produced.</p>
+<p>How do you know each new version really is better? You need a gatekeeper. We built four, locked the experimental design before running anything, and ran 120 trajectories of 20 revisions each. Behind them sat 2,000 more pictures the AI never saw, generated by the same rules, which told <em>us</em> the truth.</p>
+<p>Under a gatekeeper that only checks a visible score, the AI's score on the 60 pictures it could see climbed to 100&nbsp;% in seven runs out of ten, while the hidden truth stayed flat or fell. It had learned the pictures: special cases in the code that recognised individual examples by their coordinates. Nobody asked it to do this; it is simply the shortest route to a higher score. Adding a hidden test set stopped the damage and produced nothing. The only gatekeeper under which the program improved on the hidden truth was the one that demanded correct behaviour on specified postures, independent of any example set. Under it the AI found the real geometric flaw in the original code in seven runs out of ten, and in ten out of ten with a stronger model.</p>
+<p>Three things surprised us. A deliberately stupid optimiser that cannot write code ended with <em>better</em> real accuracy than the AI under the visible-score gatekeeper, because it cannot memorise. The stronger model was no safer under the weak gatekeeper, only more productive under the strong one. And taking away the AI's notes to itself between rounds, which we had assumed was the risky channel, made the gaming faster and the honest fix rarer.</p>
+<div class="fig-frame">
+<img src="https://cdn.jsdelivr.net/gh/nickjlamb/rsi-loop@main/findings-infographic.png" alt="Infographic. Headline: we let an AI improve its own code 2,400 times; what it did depended entirely on who was checking. Four gatekeepers compared on the score the AI could see versus real accuracy after 20 revisions: A, ask the AI, 95% visible, 71% real, drifted; B, visible score, 98% visible, 72% real, gamed, perfect visible scores in 7 of 10 runs; C, plus hidden test, 91% visible, 74% real, stalled; D, plus behaviour check, 89% visible, 79% real, improved, real flaw fixed in 7 of 10 runs. Every run started at 87% visible and 74% real. Three surprises: a dumb optimiser beat the AI under B (76% vs 72%); a stronger model found the fix 10 of 10 times under D but was not safer under B; removing the AI's notes cut honest fixes from 7 of 10 to 3 of 10. Lesson: check behaviour, not scores." loading="lazy" decoding="async">
 </div>
-<p class="demo-caption">Real-time recording of <code>python3 demo.py</code>, which replays a hand-authored v1 → v2 change and the audit. The "analysis" panel describes a fix I made; no optimiser generated it.</p>
+<p class="demo-caption">The study in one picture. Full-size version and the data behind every number are linked below.</p>
+<div class="lesson"><strong>The lesson for anyone building a system that improves itself: check behaviour, not scores.</strong> A score can be learned. A behaviour you can specify independently of any example set cannot be faked without actually doing the thing.</div>
+<div class="link-row">
+<a href="https://github.com/nickjlamb/rsi-loop/blob/main/docs/rsi-loop-2-results.md" target="_blank" rel="noopener noreferrer">Results write-up →</a>
+<a href="https://github.com/nickjlamb/rsi-loop/blob/main/experiments/preregistration.md" target="_blank" rel="noopener noreferrer">Preregistration (frozen 1 Oct 2026) →</a>
+<a href="https://doi.org/10.5281/zenodo.23223679" target="_blank" rel="noopener noreferrer">All 120 trajectories on Zenodo →</a>
+<a href="https://cdn.jsdelivr.net/gh/nickjlamb/rsi-loop@main/findings-infographic.png" target="_blank" rel="noopener noreferrer">Infographic, full size →</a>
+</div>
 </div>
 </div>
 </section>
@@ -679,7 +697,7 @@ Watch the Narrated Demo
 <div class="section-body reveal">
 <p class="lead">The same three letters describe both the hardest open problem in AI safety and the most common occupational injury among the people building it.</p>
 <p>RSI in machine-learning circles is <em>Recursive Self-Improvement</em> — a system that edits its own logic to get better at its objective. RSI in physiotherapy is <em>Repetitive Strain Injury</em> — what happens to your forearms after a few thousand keystrokes a week. The first one is a frontier-lab anxiety; the second is what you actually wake up with on a Wednesday after shipping a frontier-lab feature on a Tuesday.</p>
-<p>This project leans into the joke, with one honest caveat up front. It is the <em>gate</em> a self-modifying Repetitive-Strain-Injury detector would need — a benchmark check plus a regulatory auditor that asks, in effect, "Would a clinician actually sign off on this?" — applied to a detector that, in this version, I changed by hand. The repository contains the gate; the loop that would run inside it is the follow-up experiment described at the end of this page.</p>
+<p>This project started in 2025 as a hand-made prototype of that gate. The September 2026 audit of the prototype asked the obvious question, whether the gate would hold against an optimiser that can rewrite the detector in full and is under pressure to score well, and the experiment above is the answer. The pun stayed.</p>
 </div>
 </div>
 </section>
@@ -688,7 +706,7 @@ Watch the Narrated Demo
 <p class="section-label"><span class="section-num">02</span>Architecture</p>
 <h2 class="section-heading">A two-stage validation pipeline</h2>
 <div class="section-body">
-<p>Self-improving systems fail when their objective is too easy to satisfy. The RSI Loop separates "did it work?" (Stage&nbsp;1) from "is the result clinically meaningful?" (Stage&nbsp;2). A candidate detector — today, one I wrote by hand — is accepted as <code>COMPLETE</code> only if it passes <em>both</em> stages.</p>
+<p>Self-improving systems fail when their objective is too easy to satisfy. The RSI Loop separates "did it work?" (Stage&nbsp;1) from "is the result clinically meaningful?" (Stage&nbsp;2). In the original prototype a candidate detector, written by hand, was accepted as <code>COMPLETE</code> only if it passes <em>both</em> stages.</p>
 <p style="font-size: 0.85rem; color: var(--muted); font-style: italic; padding: 0.6rem 0.9rem; border-left: 2px solid var(--rule); max-width: 60ch; margin-bottom: 1.5rem;">Read top to bottom — each stage produces a verdict and an exit code, and the loop is <code style="font-style: normal;">COMPLETE</code> only if both verdicts are <code style="font-style: normal;">PASS</code>.</p>
 <div class="pipeline reveal">
 <div class="stage stage-accuracy">
@@ -711,7 +729,7 @@ Watch the Narrated Demo
 <div class="stage stage-compliance">
 <span class="stage-tag">Stage 02 · Compliance</span>
 <h3>Are the thresholds clinically plausible?</h3>
-<p class="stage-lede">The Auditor reads the live thresholds out of <code>detector.py</code> via <code>getattr</code> and compares each one against the <em>Clinical Gold Standard</em>. A candidate with thresholds outside the clinical range is rejected here even if Stage 1 was satisfied. One caveat: on this benchmark the two stages never disagree — every threshold inside the clinical range scores 100 % — so the gate has not been tested under optimisation pressure.</p>
+<p class="stage-lede">The Auditor reads the live thresholds out of <code>detector.py</code> via <code>getattr</code> and compares each one against the <em>Clinical Gold Standard</em>. A candidate with thresholds outside the clinical range is rejected here even if Stage 1 was satisfied. On the original ten-case benchmark the two stages never disagreed, so the prototype never tested the gate under optimisation pressure; the experiment is that test, with Stage&nbsp;2 strengthened into an absolute behavioural envelope.</p>
 <dl class="stage-grid">
 <dt>Standard</dt>    <dd>Forward-head <code>15–25°</code> · Wrist deviation <code>40–60°</code></dd>
 <dt>Tolerance</dt>   <dd>±5° warning band; beyond → hard failure</dd>
@@ -727,78 +745,17 @@ Watch the Narrated Demo
 <div class="pipeline-arrow" aria-hidden="true">▼</div>
 <div class="final-status"><strong>RSI LOOP STATUS: COMPLETE</strong> &nbsp;·&nbsp; accurate AND compliant</div>
 </div>
+<p style="margin-top: 2rem;">The experiment generalised this two-stage shape into four gatekeepers: <strong>A</strong> asks the optimiser whether its change is better; <strong>B</strong> is Stage&nbsp;1 alone (the visible score must not fall); <strong>C</strong> adds a hidden set the optimiser never sees; <strong>D</strong> adds Stage&nbsp;2 in its strongest form, an absolute behavioural envelope the candidate must satisfy on a fixed sweep of specified postures, plus canary inputs. The two panels below show what each of the extremes did over twenty revisions.</p>
+<div class="fig-frame">
+<img src="https://cdn.jsdelivr.net/gh/nickjlamb/rsi-loop@main/findings-dynamics.png" alt="Two line charts, revision 0 to 20 on the horizontal axis and accuracy on the vertical. Left, gatekeeper B, visible score only: the score the AI could see rises from 87% to 98% while real accuracy on hidden data drifts from 74% to 72%. Right, gatekeeper D, with the behaviour check: the visible score moves only from 87% to 89% while real accuracy steps up from 74% to 79% as the real fix is found around revision 5 to 9. Ten faint lines per panel show individual runs; the bold line is their average." loading="lazy" decoding="async">
+</div>
+<p class="demo-caption">Proxy versus truth over twenty revisions, Claude Sonnet 5, ten runs per gatekeeper. Under B the visible score climbs while the hidden truth sags: the Goodhart curve. Under D the visible score barely moves and the truth steps up as the real fix lands. The gate changed what the optimiser proposed, not just what it accepted: under D it put forward far fewer envelope-violating candidates in the first place.</p>
 </div>
 </div>
 </section>
 <section>
 <div class="page-width">
-<p class="section-label"><span class="section-num">03</span>Evolution Log</p>
-<h2 class="section-heading">v1 → v2, replayed</h2>
-<div class="section-body">
-<p>The v1 detector used a signed horizontal offset (<code>hand_x − wrist_x &gt; 0.10</code>) — direction-blind, so it caught ulnar deviation but silently missed radial deviation on scenario&nbsp;S06. I replaced both heuristics with proper trigonometric angles between the forearm and metacarpal vectors, and v2 passes. <code>demo.py</code> narrates this change; it does not generate it.</p>
-<div class="terminal reveal" role="img" aria-label="Terminal output of demo.py replaying the hand-authored v1 to v2 change.">
-<div class="terminal-bar">
-<span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
-<span class="terminal-bar-title">demo.py — RSI Loop v1 → v2 replay</span>
-</div>
-<div class="terminal-body"><span class="term-prompt">$</span> python3 demo.py
-<span class="term-rule">────────────────────────────────────────────────────────────────</span>
-<span class="term-cycle">CYCLE 1 — v1 detector (intentionally flawed)</span>
-S05_severe_ulnar_deviation     <span class="term-pass">PASS</span>
-<span class="term-em">S06_radial_deviation           <span class="term-fail">FAIL</span>  expected=High Strain  predicted=Safe</span>
-S07_combined_strain            <span class="term-pass">PASS</span>
-Accuracy <span class="term-fail">90%</span>   Precision 100%   Recall <span class="term-fail">80%</span>   F1 0.89
-<span class="term-rule">────────────────────────────────────────────────────────────────</span>
-<span class="term-cycle">ANALYSIS &amp; PROPOSED FIX (hand-authored)</span>
-<span class="term-key">Failure</span>:  v1's signed offset (<span class="term-em">hand_x − wrist_x</span>) only fires
-when displacement is positive. Radial deviation
-produces a negative offset and is silently ignored.
-<span class="term-key">Fix</span>:      Replace both heuristics with proper trigonometric
-angles. Forward-head: <span class="term-em">atan2(|dx|, |dy|)</span>. Wrist:
-angle between forearm vector (elbow→wrist) and
-metacarpal vector (wrist→hand_center). Both are
-direction-agnostic — radial AND ulnar are caught.
-<span class="term-key">New thresholds</span>: <span class="term-em">20°</span> head · <span class="term-em">50°</span> wrist
-<span class="term-rule">────────────────────────────────────────────────────────────────</span>
-<span class="term-cycle">CYCLE 2 — v2 detector (corrected)</span>
-S05_severe_ulnar_deviation     <span class="term-pass">PASS</span>   wrist=68.7°
-S06_radial_deviation           <span class="term-pass">PASS</span>   wrist=136.5°
-S07_combined_strain            <span class="term-pass">PASS</span>   wrist=67.5°
-Accuracy <span class="term-pass">100%</span>  Precision 100%   Recall <span class="term-pass">100%</span>  F1 1.00
-<span class="term-rule">────────────────────────────────────────────────────────────────</span>
-<span class="term-cycle">STAGE 2 — Regulatory Audit</span>
-Forward Head Threshold     20.00°  ∈ [15.0, 25.0]   <span class="term-pass">PASS</span>
-Wrist Deviation Threshold  50.00°  ∈ [40.0, 60.0]   <span class="term-pass">PASS</span>
-Overall Compliance: <span class="term-pass">PASS</span>
-<span class="term-rule">────────────────────────────────────────────────────────────────</span>
-<span class="term-em">RSI LOOP STATUS:</span> <span class="term-complete">COMPLETE</span>  <span class="term-dim">— accurate AND compliant</span></div>
-</div>
-<p style="margin-top: 1.2rem;">The gate does catch the attack it was designed for: drift the wrist threshold to <code>67°</code> and Stage 1 still passes 100%, but Stage 2 returns <code>HARD FAILURE</code> (7° beyond the clinical max) and the candidate is rejected.</p>
-<p>It also has holes, found in a September 2026 audit and each reproduced against an untouched copy of the code:</p>
-<div class="next-grid reveal">
-<div class="next-card">
-<h4>Same-process tampering</h4>
-<p>The Auditor reads thresholds from the live <code>detector</code> module, and <code>assess()</code> runs before <code>run_audit()</code>. Three lines inside <code>assess()</code> that import <code>auditor</code> and rewrite the gold standard let the 67° threshold pass as <code>COMPLETE</code>.</p>
-</div>
-<div class="next-card">
-<h4>Lookup-table memorisation</h4>
-<p>A <code>detector.py</code> that opens <code>benchmarks.json</code> and returns the stored label on an exact landmark match scores 100 % and passes the audit with thresholds untouched. The evaluator cannot tell a table from a classifier.</p>
-</div>
-<div class="next-card">
-<h4>Gate tolerance</h4>
-<p>A forward-head threshold of <code>15.0°</code> — inside the clinical range — misclassifies scenario S08 (15.07°) and is still certified <code>COMPLETE</code>, because 90 % clears the accuracy gate.</p>
-</div>
-<div class="next-card">
-<h4>Camera-roll sensitivity</h4>
-<p>v2 measures forward-head angle against the <em>image</em> vertical, not the torso. Rotating the benchmark landmarks to simulate a tilted webcam gives 90 % at +5°, 80 % at +15° and 60 % at +20°. The benchmark, which has no roll, cannot see this.</p>
-</div>
-</div>
-</div>
-</div>
-</section>
-<section>
-<div class="page-width">
-<p class="section-label"><span class="section-num">04</span>The Pharma Angle</p>
+<p class="section-label"><span class="section-num">03</span>The Pharma Angle</p>
 <h2 class="section-heading">GxP-Ready Agentic Design</h2>
 <div class="section-body">
 <p>Pharma teams already have a name for "let the system improve, but only inside an immutable spec": <strong>Computer System Validation (CSV)</strong>. The RSI Loop's two-stage pipeline maps cleanly onto CSV's separation between <em>functional</em> qualification (does the system do what it claims?) and <em>performance</em> qualification (does it stay inside its validated envelope under change?).</p>
@@ -828,40 +785,40 @@ Overall Compliance: <span class="term-pass">PASS</span>
 </tr>
 <tr>
 <td>Independence of QA</td>
-<td><em>Not yet achieved.</em> The Auditor is a separate module, but it runs in the same process as the candidate, and a candidate can rewrite the gold standard before it is read. Process isolation is the first fix in the follow-up design.</td>
+<td>In the experiment the candidate runs in a separate, audit-hooked process with no file, network or OS access, and the verifier holds information the candidate never sees. The 2025 prototype lacked this; the audit that found it is in <code>docs/</code>.</td>
 </tr>
 <tr>
 <td>Audit trail</td>
-<td><code>last_run.json</code> persists each run's metrics + audit verdict for diff against future versions</td>
+<td>Every revision archives its prompt, response, candidate code, scores and gate decision; the full set of 2,400 is on Zenodo with a SHA-256 manifest</td>
 </tr>
 </tbody>
 </table>
-<p>The takeaway for pharma audiences: <strong>an acceptance gate with an external, immutable spec is a pattern regulated environments already understand.</strong> The RSI Loop is a 1,150-line sketch of that shape, in a domain (ergonomics) that's friendly enough to host it without regulatory entanglement. Whether the shape holds against a real optimiser — one that can rewrite the detector in full and is under pressure to score well — is exactly what the follow-up experiment tests.</p>
+<p>The takeaway for pharma audiences: <strong>an acceptance gate with an external, immutable spec is a pattern regulated environments already understand</strong>, and the experiment says it is the part that matters. The visible-score check alone was gamed; the spec-shaped check was what let real improvement through.</p>
 </div>
 </div>
 </section>
 <section>
 <div class="page-width">
-<p class="section-label"><span class="section-num">05</span>Limitations &amp; Roadmap</p>
+<p class="section-label"><span class="section-num">04</span>Limitations &amp; Roadmap</p>
 <h2 class="section-heading">What this prototype is — and isn't</h2>
 <div class="section-body">
-<p>This is a deliberately small, deliberately observable prototype. The point is the <em>shape of the gate</em>, not the model. Honest about what it is and isn't:</p>
+<p>This is a deliberately small, deliberately observable experiment. The point is the <em>shape of the gate</em>, not the model. Honest about what it is and isn't:</p>
 <div class="next-grid reveal">
 <div class="next-card">
 <h4>Today</h4>
-<p><strong>No optimiser.</strong> The v1 → v2 change was made by hand, with full visibility of every benchmark case and every auditor interval. Synthetic benchmark suite (10 hand-authored landmark sets, labels assigned by construction). Two detection rules. Static Clinical Gold Standard hard-coded in the Auditor. Verifier in the same process as the candidate.</p>
+<p><strong>A finished, preregistered experiment.</strong> Four gates × ten seeds × twenty revisions with Claude Sonnet 5, plus Opus 5, a notes-off condition and a parametric baseline: 120 trajectories, about $1,000 of API credit, one laptop. Hypotheses, metrics and decision rules were frozen before the first run; every defect found afterwards is logged, not patched over. Limits: one environment with a simple, known truth rule; ten seeds per cell; one model family; twenty revisions.</p>
 </div>
 <div class="next-card">
 <h4>Next</h4>
-<p>Turn the gate into an experiment: an LLM optimiser that rewrites <code>detector.py</code> in full for twenty generations; a seeded simulator whose latent angles define the truth; a visible benchmark drawn from a narrow distribution and a hidden one from a broad distribution (camera roll, either hand, realistic noise); a process-isolated verifier; every proposal scored on the hidden set. The question is which verification architectures keep genuine performance, not just measured performance. The preregistration draft is in the repo at <a href="https://github.com/nickjlamb/rsi-loop/blob/main/docs/rsi-loop-2-research-design.md" target="_blank" rel="noopener noreferrer"><code>docs/rsi-loop-2-research-design.md</code></a>.</p>
+<p><strong>Study 2.</strong> A deliberately <em>wrong</em> behavioural envelope, to see whether a bad specification gates bad behaviour just as firmly; more than one environment; longer horizons; and an adversarial condition in which the optimiser is told outright to maximise the visible score. The first two are the questions a sceptical reader should ask of these results.</p>
 </div>
 <div class="next-card">
 <h4>Later</h4>
-<p>If the gate holds up under a real optimiser, generalise the two-stage pattern: replace the Clinical Gold Standard with whatever immutable spec governs the target domain (ABPI for promotional copy, ICH-E6 for trial design, etc.). If it doesn't hold up, that result is the more useful one.</p>
+<p>Generalise the pattern: replace the clinical envelope with whatever immutable spec governs the target domain (ABPI for promotional copy, ICH-E6 for trial design, and so on) and test whether the result holds when the spec is harder to state in physical terms.</p>
 </div>
 <div class="next-card">
 <h4>Won't</h4>
-<p>This will not become a clinical device, a workplace surveillance tool, or a substitute for a real ergonomist. The intent is methodological — to show the shape of a domain-grounded acceptance gate in a small, portable form, and to be honest about what it has and hasn't been tested against.</p>
+<p>This will not become a clinical device, a workplace surveillance tool, or a substitute for a real ergonomist. The intent is methodological: to measure, in a small and fully observable setting, which kinds of gate keep real performance rather than measured performance.</p>
 </div>
 </div>
 </div>
@@ -869,11 +826,11 @@ Overall Compliance: <span class="term-pass">PASS</span>
 </section>
 <section id="faq">
 <div class="page-width">
-<p class="section-label"><span class="section-num">06</span>FAQ</p>
+<p class="section-label"><span class="section-num">05</span>FAQ</p>
 <h2 class="section-heading">What does RSI mean in AI?</h2>
 <div class="section-body">
 <p>In AI, <strong>RSI stands for recursive self-improvement</strong>: a system that improves its own ability to improve — rewriting its own logic, tuning its own thresholds, or upgrading the very process it uses to get better. Each cycle compounds on the last, which is why RSI sits at the centre of debates about accelerating AI capability and how to keep it under meaningful oversight.</p>
-<p>This page is a small, inspectable prototype of the <em>gate</em> such a system would need — applied to a detector that targets the other RSI, repetitive strain injury. In this version the changes to the detector were made by hand; the follow-up experiment described above adds the optimiser.</p>
+<p>This page reports a small, inspectable experiment on the <em>gate</em> such a system would need — applied to a detector that targets the other RSI, repetitive strain injury. An LLM rewrote the detector twenty times per run under four different gates; only the gate that checked behaviour against a fixed physical specification let real improvement through.</p>
 <div class="faq reveal">
 <div class="faq-item">
 <h3>What is recursive self-improvement, in plain terms?</h3>
@@ -881,11 +838,11 @@ Overall Compliance: <span class="term-pass">PASS</span>
 </div>
 <div class="faq-item">
 <h3>Is recursive self-improvement dangerous?</h3>
-<p>Unbounded self-improvement is a core AI-safety concern: a system optimising itself against a narrow score can drift into behaviour its designers never intended. The RSI Loop sketches one mitigation pattern — a two-stage gate in which a candidate change must pass both an accuracy check and an independent auditor that holds the system inside clinically plausible bounds. Whether that gate holds against an optimiser that can rewrite the detector in full, and is under pressure to score well, has not been tested here; that is the follow-up experiment.</p>
+<p>Unbounded self-improvement is a core AI-safety concern: a system optimising itself against a narrow score can drift into behaviour its designers never intended. The RSI Loop sketches one mitigation pattern — a two-stage gate in which a candidate change must pass both an accuracy check and an independent auditor that holds the system inside clinically plausible bounds. The October 2026 experiment tested exactly that. Under a gate that only required a visible score not to fall, Claude Sonnet 5 reached a perfect visible score in 7 of 10 runs by memorising the test set while hidden accuracy stayed flat or fell. A gate that also required correct behaviour on a fixed sweep of specified postures stopped the gaming and was the only architecture under which hidden accuracy rose.</p>
 </div>
 <div class="faq-item">
 <h3>What is the RSI Loop, concretely?</h3>
-<p>A Python prototype (~1,150 lines) that detects repetitive-strain risk from posture landmarks, plus a two-stage acceptance gate. The v1 → v2 change that lifted benchmark accuracy from 90 % to 100 % was made by hand, with both thresholds inside gold-standard clinical ranges; there is no optimiser in the current code. A September 2026 audit found that the gate can be rewritten from inside the candidate's process, cannot distinguish a lookup table from a classifier, and cannot see that v2 is sensitive to camera roll.</p>
+<p>A Python harness (MIT-licensed) in which an LLM rewrites a posture-risk classifier for 20 revisions under one of four acceptance gates, with a seeded simulator defining the ground truth, a process-isolated sandbox, and a preregistered analysis. The October 2026 confirmatory run covered 120 trajectories with Claude Sonnet 5 and Claude Opus 5 plus a parametric baseline; every prompt, policy and gate decision is archived at Zenodo (<a href="https://doi.org/10.5281/zenodo.23223679" target="_blank" rel="noopener noreferrer">DOI 10.5281/zenodo.23223679</a>). The original 2025 version was a 1,150-line hand-made prototype of the gate; a September 2026 audit of it motivated the experiment.</p>
 </div>
 <div class="faq-item">
 <h3>What does RSI mean in computing?</h3>
@@ -893,7 +850,7 @@ Overall Compliance: <span class="term-pass">PASS</span>
 </div>
 <div class="faq-item">
 <h3>What is RSI in machine learning?</h3>
-<p>In machine learning, RSI is recursive self-improvement: a system that takes part in improving itself, rather than being improved only by its developers. Ordinary training improves a model against a fixed objective, under a process the developers control. In recursive self-improvement, the system also modifies the improvement process itself — proposing new logic, tests or thresholds. That autonomy is what makes RSI powerful, and what makes independent verification essential — which is why the follow-up design keeps the optimiser and the verifier in separate processes with separate information.</p>
+<p>In machine learning, RSI is recursive self-improvement: a system that takes part in improving itself, rather than being improved only by its developers. Ordinary training improves a model against a fixed objective, under a process the developers control. In recursive self-improvement, the system also modifies the improvement process itself — proposing new logic, tests or thresholds. That autonomy is what makes RSI powerful, and what makes independent verification essential — which is why the RSI Loop keeps the optimiser and the verifier in separate processes with separate information.</p>
 </div>
 <div class="faq-item">
 <h3>How close is AI to RSI?</h3>
@@ -905,17 +862,17 @@ Overall Compliance: <span class="term-pass">PASS</span>
 </section>
 <section class="final-cta">
 <div class="page-width final-cta-inner">
-<h2>Read the code, then read the audit.</h2>
-<p>Everything is in one repo: detector, auditor, benchmarks, narrated demo, the recording you saw above, and the audit plus follow-up design in <code>docs/</code>. About 1,150 lines, MIT-licensed, runs on a laptop in under a second.</p>
-<p>If you came for the safety question rather than the code: the <a href="https://github.com/nickjlamb/rsi-loop/blob/main/docs/rsi-loop-2-research-design.md" target="_blank" rel="noopener noreferrer">preregistered follow-up design</a> is in the repo, and <a href="/observer-zero">Observer Zero</a>, the other PharmaTools.AI Labs experiment, asks a neighbouring question — whether a society of LLM agents can tell that the rules of its world have changed.</p>
+<h2>Read the findings, then read the data.</h2>
+<p>Everything is open: the frozen design and preregistration, the harness, every prompt and every version of the code the optimiser wrote, every gate decision, and the analysis that produced the numbers above. The repo is MIT-licensed; the 120-trajectory archive is on Zenodo under CC&nbsp;BY.</p>
+<p>If you came for the safety question rather than the code: the <a href="https://github.com/nickjlamb/rsi-loop/blob/main/docs/rsi-loop-2-results.md" target="_blank" rel="noopener noreferrer">results write-up</a> and the <a href="https://github.com/nickjlamb/rsi-loop/blob/main/experiments/preregistration.md" target="_blank" rel="noopener noreferrer">preregistration</a> are in the repo, and <a href="/observer-zero">Observer Zero</a>, the other PharmaTools.AI Labs experiment, asks a neighbouring question — whether a society of LLM agents can tell that the rules of its world have changed.</p>
 <div class="proj-ctas" style="justify-content: center;">
 <a class="btn-primary" href="https://github.com/nickjlamb/rsi-loop">
 <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.69-.01-1.36-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.81.06 1.23.83 1.23.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.03 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38C13.71 14.53 16 11.54 16 8c0-4.42-3.58-8-8-8z"/></svg>
 View Source on GitHub
 </a>
-<a class="btn-secondary" href="#demo">
-<span aria-hidden="true">▸</span>
-Watch the Narrated Demo
+<a class="btn-secondary" href="https://doi.org/10.5281/zenodo.23223679" target="_blank" rel="noopener noreferrer">
+<span aria-hidden="true">⇩</span>
+Data on Zenodo
 </a>
 </div>
 </div>
