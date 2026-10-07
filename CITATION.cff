@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this code or data, please cite it as below."
+type: software
+title: "RSI Loop 2: a preregistered testbed for acceptance-gate architectures in LLM self-improvement loops"
+authors:
+  - family-names: Lamb
+    given-names: Nicholas
+    orcid: "https://orcid.org/0009-0009-6266-8499"
+    affiliation: "PharmaTools.AI"
+repository-code: "https://github.com/nickjlamb/rsi-loop"
+license: MIT
+version: v2.1
+date-released: 2026-10-07
+keywords:
+  - Goodhart's law
+  - reward hacking
+  - specification gaming
+  - recursive self-improvement
+  - AI safety
+  - preregistration
+references:
+  - type: data
+    title: "RSI Loop 2: trajectory artifacts and frozen analysis"
+    authors:
+      - family-names: Lamb
+        given-names: Nicholas
+    doi: "10.5281/zenodo.23223679"
+    year: 2026
+    publisher:
+      name: Zenodo

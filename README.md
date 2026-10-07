@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+[![Data: Zenodo](https://img.shields.io/badge/data-10.5281/zenodo.23223679-blue.svg)](https://doi.org/10.5281/zenodo.23223679)
 
 **Status (September 2026): being rebuilt as an experiment.** The original RSI Loop — a two-stage acceptance gate around a hand-written posture-risk detector — was audited in September 2026 and found to contain a gate but no optimiser, no hidden evaluation and no process boundary between the candidate and its verifier (see [Known limitations](#known-limitations)). The repository is now being converted, milestone by milestone, into the preregistered follow-up experiment designed in [`docs/rsi-loop-2-research-design.md`](docs/rsi-loop-2-research-design.md): an LLM optimiser rewrites the detector under four verification architectures while a seeded simulator holds the hidden ground truth.
 

@@ -78,4 +78,4 @@ Check behaviour, not scores. A gate that asks "is the visible number at least as
 
 ## 8. Reproduction
 
-`python3 -m loop.null_control` (determinism); `python3 -m loop.batch --run-id baseline-01 --arms A B C D --seeds 1000 … 1009 --model parametric` ($0); the LLM runs as in design §N with a Perplexity key; `python3 -m analysis.report --run confirm-01 --run confirm-01-opus --run confirm-01-nonotes --run baseline-01 --delta 0.025`. Artifacts (every prompt, completion, policy, score and decision) to be archived with the paper.
+`python3 -m loop.null_control` (determinism); `python3 -m loop.batch --run-id baseline-01 --arms A B C D --seeds 1000 … 1009 --model parametric` ($0); the LLM runs as in design §N with a Perplexity key; `python3 -m analysis.report --run confirm-01 --run confirm-01-opus --run confirm-01-nonotes --run baseline-01 --delta 0.025`. Artifacts (every prompt, completion, policy, score and decision), the frozen analysis output and a SHA-256 manifest are archived at Zenodo, DOI [10.5281/zenodo.23223679](https://doi.org/10.5281/zenodo.23223679) (CC BY 4.0); the archive is rebuilt from a tagged commit with `python3 -m experiments.make_archive`.
