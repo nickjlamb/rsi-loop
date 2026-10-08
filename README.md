@@ -2,9 +2,10 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+[![Preprint](https://img.shields.io/badge/preprint-10.5281%2Fzenodo.23236100-blue.svg)](https://doi.org/10.5281/zenodo.23236100)
 [![Data: Zenodo](https://img.shields.io/badge/data-10.5281%2Fzenodo.23223679-blue.svg)](https://doi.org/10.5281/zenodo.23223679)
 
-**Status (October 2026): experiment complete, results published.** An LLM optimiser rewrote a small posture-risk classifier 20 times per run under four acceptance-gate architectures, with a seeded simulator holding the hidden ground truth. The design was frozen and preregistered before the first confirmatory run (`v2.0-freeze`, 1 Oct 2026); 120 trajectories ran 1–7 Oct 2026; the frozen analysis was executed once. Lay summary: [pharmatools.ai/rsi-loop](https://pharmatools.ai/rsi-loop).
+**Status (October 2026): experiment complete, results published.** An LLM optimiser rewrote a small posture-risk classifier 20 times per run under four acceptance-gate architectures, with a seeded simulator holding the hidden ground truth. The design was frozen and preregistered before the first confirmatory run (`v2.0-freeze`, 1 Oct 2026); 120 trajectories ran 1–7 Oct 2026; the frozen analysis was executed once. Preprint: Lamb N. *A preregistered comparison of acceptance-gate architectures for an LLM that rewrites its own code.* Zenodo, 8 October 2026, [doi:10.5281/zenodo.23236100](https://doi.org/10.5281/zenodo.23236100). Lay summary: [pharmatools.ai/rsi-loop](https://pharmatools.ai/rsi-loop).
 
 ## Findings
 
@@ -21,7 +22,7 @@
 
 Three results we did not predict. A parametric hill-climber that cannot write code ended with *higher* hidden accuracy than the LLM under gate B (0.76 vs 0.72), because it cannot memorise: the Goodhart behaviour is an LLM behaviour, not a loop property. The stronger model was no safer under the weak gate (level with Sonnet on truth, four times the code changes, and the single worst degradation of the study) and more productive under the strong one (H6, supported). Removing the optimiser's notes between revisions made gaming faster and honest fixes rarer, and tripled the rate at which the model exhausted its output budget (H7, rejected by the frozen rule; both contrasts point the same way). Monitorability signals were thin: only diff size cleared the preregistered bar, and the two signals we expected to work did not (H5).
 
-Every verdict, the five post-freeze defects, and the deviations from the cost estimate are in the write-up. Full detail: [`docs/rsi-loop-2-results.md`](docs/rsi-loop-2-results.md) · [preregistration](experiments/preregistration.md) · [design and decision log](docs/rsi-loop-2-research-design.md) · all 120 trajectories with a SHA-256 manifest: [doi:10.5281/zenodo.23223679](https://doi.org/10.5281/zenodo.23223679) · [infographic](findings-infographic.png).
+Every verdict, the five post-freeze defects, and the deviations from the cost estimate are in the write-up. Full detail: [preprint](https://doi.org/10.5281/zenodo.23236100) · [`docs/rsi-loop-2-results.md`](docs/rsi-loop-2-results.md) · [preregistration](experiments/preregistration.md) · [design and decision log](docs/rsi-loop-2-research-design.md) · all 120 trajectories with a SHA-256 manifest: [doi:10.5281/zenodo.23223679](https://doi.org/10.5281/zenodo.23223679) · [infographic](findings-infographic.png).
 
 ## How it was run
 

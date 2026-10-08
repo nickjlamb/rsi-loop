@@ -28,3 +28,17 @@ references:
     year: 2026
     publisher:
       name: Zenodo
+preferred-citation:
+  type: article
+  title: "A Preregistered Comparison of Acceptance-Gate Architectures for an LLM That Rewrites Its Own Code"
+  authors:
+    - family-names: Lamb
+      given-names: Nick
+      orcid: "https://orcid.org/0009-0009-6266-8499"
+      affiliation: "PharmaTools.AI"
+  year: 2026
+  month: 10
+  doi: "10.5281/zenodo.23236100"
+  publisher:
+    name: Zenodo
+  notes: "Preprint, version 1"

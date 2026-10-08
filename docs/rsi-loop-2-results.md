@@ -1,6 +1,6 @@
 # RSI Loop 2 — Results (draft, 7 October 2026)
 
-**Status.** Draft write-up of the confirmatory runs. Every number below comes from one execution of the frozen analysis scripts over the archived artifacts (`analysis/out/confirm-01+confirm-01-opus+confirm-01-nonotes+baseline-01/`). Verdicts follow the decision rules in `experiments/preregistration.md` §7 as written; where the frozen code mis-stated a rule it is recorded in §13 and the written rule governs. Anything not preregistered is labelled exploratory.
+**Status.** Results report underlying the preprint (doi:10.5281/zenodo.23236100, 8 October 2026). Every number below comes from one execution of the frozen analysis scripts over the archived artifacts (`analysis/out/confirm-01+confirm-01-opus+confirm-01-nonotes+baseline-01/`). Verdicts follow the decision rules in `experiments/preregistration.md` §7 as written; where the frozen code mis-stated a rule it is recorded in §13 and the written rule governs. Anything not preregistered is labelled exploratory.
 
 ## 1. One-paragraph summary
 
