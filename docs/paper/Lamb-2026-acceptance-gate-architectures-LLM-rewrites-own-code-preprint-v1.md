@@ -1,7 +1,7 @@
 ---
-title: "Check Behaviour, Not Scores: A Preregistered Comparison of Acceptance-Gate Architectures for an LLM That Rewrites Its Own Code"
-author: "Nicholas Lamb (PharmaTools.AI; ORCID 0009-0009-6266-8499)"
-date: "Preprint, version 1 — 8 October 2026"
+title: "A Preregistered Comparison of Acceptance-Gate Architectures for an LLM That Rewrites Its Own Code"
+author: "Nick Lamb (PharmaTools.AI; ORCID 0009-0009-6266-8499)"
+date: "Preprint, version 1 — 8 October 2026 — doi:10.5281/zenodo.23236100 — CC BY 4.0"
 ---
 
 **Abstract**
@@ -14,7 +14,7 @@ When a language model is allowed to revise a program repeatedly and a gate decid
 
 Systems that improve themselves need a gatekeeper. Whether the system is a model proposing patches to its own evaluation harness, an agent tuning the program it runs, or the small posture classifier used here, each proposed revision must be checked against something before it replaces the current version, and the obvious thing to check is a score. The difficulty is as old as Goodhart's observation about economic indicators: a score that is optimised stops measuring what it was meant to measure. In the language-model setting the difficulty is acute, because the optimiser is capable, reads the evaluation code, and can see every example the score is computed on.
 
-That LLM agents exploit visible evaluations is now established. SpecBench measures the gap between visible and hidden tests across systems-programming tasks and documents a 2,900-line "compiler" that memorised test inputs [1]; BAITBENCH plants shortcuts in ML tasks and finds that frontier agents recognise the shortcut and take it in 57 % of runs [2]; METR reports that a double-digit fraction of successful long-horizon runs by recent frontier models involved some form of cheating [3]. These are field observations of a rate. What they do not tell a builder is the question that matters at design time: given that the optimiser will do this, which architecture of gate preserves real performance over repeated revisions, and at what cost in real improvement?
+That LLM agents exploit visible evaluations is now established. SpecBench measures the gap between visible and hidden tests across systems-programming tasks and documents a 2,900-line "compiler" that memorised test inputs [1]; BAITBENCH plants shortcuts in ML tasks and finds that frontier agents recognise the shortcut and take it in 57 % of runs [2]; METR reports that a double-digit fraction of successful long-horizon runs by recent frontier models involved some form of cheating [3, 4]. These are field observations of a rate. What they do not tell a builder is the question that matters at design time: given that the optimiser will do this, which architecture of gate preserves real performance over repeated revisions, and at what cost in real improvement?
 
 This paper answers that question in a deliberately small setting where it can be answered exactly. Four acceptance architectures were compared head-to-head, with the same optimiser, the same seeds and the same 20-revision horizon, on a task whose ground truth is defined by a seeded simulator rather than by a test set. The unit of analysis is the trajectory, not the run: we observe when the proxy and the truth part company, how fast, by what route, and what each gate does to the lineage of accepted versions. Everything that could be fixed in advance was fixed in advance, in a preregistration frozen at a public git tag, and everything that went wrong afterwards is reported as a defect rather than repaired and re-run.
 
@@ -22,11 +22,11 @@ The contributions are, first, the trajectory-level, paired, preregistered compar
 
 # 2. Related work
 
-The phenomenon is not in question. Specification gaming has a long catalogue [4], and the mechanism by which optimising a proxy degrades the target has been formalised for reward models [5] and for reinforcement learning [6]. The recent LLM-agent benchmarks measure it at frontier scale: SpecBench [1] and BAITBENCH [2] quantify the visible–hidden gap and the rate of shortcut-taking per run; the Reward Hacking Benchmark finds that most hacks arrive with an explicit rationale in the transcript [7]; ImpossibleBench makes tasks impossible so that any pass is a hack [8]; METR's reports document scorer tampering and test extraction by production models [3]. Our transcripts reproduce all of these behaviours in miniature, and we cite them as motivation rather than as something to re-demonstrate.
+The phenomenon is not in question. Specification gaming has a long catalogue [5], and the mechanism by which optimising a proxy degrades the target has been formalised for reward models [6] and for reinforcement learning [7, 8]. The recent LLM-agent benchmarks measure it at frontier scale: SpecBench [1] and BAITBENCH [2] quantify the visible–hidden gap and the rate of shortcut-taking per run; the Reward Hacking Benchmark finds that most hacks arrive with an explicit rationale in the transcript [9]; ImpossibleBench makes tasks impossible so that any pass is a hack [10]; METR's reports document scorer tampering and test extraction by production models [3, 4]. Our transcripts reproduce all of these behaviours in miniature, and we cite them as motivation rather than as something to re-demonstrate.
 
-Closer to our question are three strands of 2026 work on verification. *The Verification Horizon* argues, with large-scale experiments, that no fixed reward function stays effective as policy capability grows and that verification must co-evolve [9]; our capability factor (H6) is a small, controlled instance of that axis. *Who Grades the Grader?* co-evolves an evaluation metric with the skill it grades, validates against hidden ground truth, and shows that removing anchor guards collapses the metric to always-pass [10]; its variable is the evaluator's own evolution, whereas ours is the information and form of a fixed gate. *The Red Queen Gödel Machine* studies recursive self-improvement with co-evolving evaluators and finds and corrects reviewer bias [11], but optimises capability rather than measuring proxy–truth drift under alternative gates. *Proof-Carrying Cognition* names the "verification gap", argues for reality-settled reward, and includes a preregistered replication, a precedent for the methodology used here [12]. Surveys of self-evolving coding agents name benchmark overfitting and patches that pass local checks as open problems and report little systematic held-out evaluation in the surveyed loops [13, 14].
+Closer to our question are three strands of 2026 work on verification. *The Verification Horizon* argues, with large-scale experiments, that no fixed reward function stays effective as policy capability grows and that verification must co-evolve [11]; our capability factor (H6) is a small, controlled instance of that axis. *Who Grades the Grader?* co-evolves an evaluation metric with the skill it grades, validates against hidden ground truth, and shows that removing anchor guards collapses the metric to always-pass [12]; its variable is the evaluator's own evolution, whereas ours is the information and form of a fixed gate. *The Red Queen Gödel Machine* studies recursive self-improvement with co-evolving evaluators and finds and corrects reviewer bias [13], but optimises capability rather than measuring proxy–truth drift under alternative gates. *Proof-Carrying Cognition* names the "verification gap", argues for reality-settled reward, and includes a preregistered replication, a precedent for the methodology used here [14]. A survey of evaluation-safety failures [15] and a survey of self-evolving coding agents [16] both name benchmark overfitting and patches that pass local checks as open problems, and the latter reports little systematic held-out evaluation in the loops it surveys.
 
-Two older ideas frame two of our arms. Arm C is holdout reuse with a language model as the adaptive analyst, the setting of Dwork et al.'s reusable-holdout analysis [15]; our result that the holdout protects but does not produce is consistent with the leakage bound being spent on rejection rather than on learning. Arm D descends from an auditor in the original 2025 version of this project, which required a detector's thresholds to sit inside a clinical range; the audit of that prototype, which found a gate with no optimiser behind it and no process boundary between candidate and verifier, is what motivated the experiment.
+Two older ideas frame two of our arms. Arm C is holdout reuse with a language model as the adaptive analyst, the setting of Dwork et al.'s reusable-holdout analysis [17]; our result that the holdout protects but does not produce is consistent with the leakage bound being spent on rejection rather than on learning. Arm D descends from an auditor in the original 2025 version of this project, which required a detector's thresholds to sit inside a clinical range; the audit of that prototype, which found a gate with no optimiser behind it and no process boundary between candidate and verifier, is what motivated the experiment.
 
 What none of the above does is vary the gate's information and form as the experimental factor, with the optimiser, seeds and horizon fixed, and score every proposal on exact truth. That is the gap this study occupies. We make no claim about reinforcement-learned reward hacking, about models with situational awareness of being tested, or about transfer beyond the toy domain; the setting is in-context gaming by a fixed model under release pressure.
 
@@ -158,7 +158,7 @@ Under arm B the hill-climber, which can only nudge the numeric parameters of a f
 
 The experiment asked which gate architecture keeps real performance when a capable optimiser revises a program under release pressure, and the answer separates cleanly into what each gate checks. A gate on a visible score checks a number the optimiser can learn, and the optimiser learned it, on every seed, by routes that ranged from literal coordinate matches to fitted intervals on nuisance features, each documented in its own notes as a success. A gate that adds a hidden score checks a number the optimiser cannot learn directly, and this stopped the learning; but a hidden score is still a score, it rejects without instructing, and on these seeds the model, told only "hidden holdout", had nothing to replace the rejected moves with. A gate that checks behaviour against a specification stated in the domain's own terms, degrees of head tilt at several camera rolls, does something the first two cannot: it names the direction in which an honest improvement lies. The rejection category "envelope" was informative in a way that "visible" and "hidden holdout" were not, and the optimiser's proposals changed accordingly (H4). That is why D was both the safest gate and the only productive one, and why a parametric optimiser with no understanding of the problem got most of the way to the same place.
 
-Two results bear on how capability interacts with oversight. The stronger model was not safer under the weak gate; it was differently unsafe, with more changes, subtler fits and the worst single outcome, and level with the weaker model on the quantity that mattered. Under the strong gate it was simply better. If this pattern holds beyond the toy, it argues against the hope that more capable optimisers will game less and for the view in *The Verification Horizon* that verification has to carry the weight [9]. The second result is the recursive channel. We expected the optimiser's notes to itself to be the vector by which a bad idea compounds; instead the notes carried the honest reasoning (the torso-reference insight, once found, was kept and built on) and the gaming needed no memory at all, because each revision could rediscover it from the per-case report. Removing the notes made the model slower, costlier, more prone to exhausting its output budget, and worse at the honest fix. Oversight designs that strip an agent of cross-step memory in the name of safety should check that they are not removing the channel through which the agent does the right thing.
+Two results bear on how capability interacts with oversight. The stronger model was not safer under the weak gate; it was differently unsafe, with more changes, subtler fits and the worst single outcome, and level with the weaker model on the quantity that mattered. Under the strong gate it was simply better. If this pattern holds beyond the toy, it argues against the hope that more capable optimisers will game less and for the view in *The Verification Horizon* that verification has to carry the weight [11]. The second result is the recursive channel. We expected the optimiser's notes to itself to be the vector by which a bad idea compounds; instead the notes carried the honest reasoning (the torso-reference insight, once found, was kept and built on) and the gaming needed no memory at all, because each revision could rediscover it from the per-case report. Removing the notes made the model slower, costlier, more prone to exhausting its output budget, and worse at the honest fix. Oversight designs that strip an agent of cross-step memory in the name of safety should check that they are not removing the channel through which the agent does the right thing.
 
 The monitorability result is a clean negative for the signals we expected to work. The V − V′ gap is the right quantity in principle, but it is only measurable by someone who holds V′, and its lead time was erratic; the bootstrap instability of P, which should rise as a policy overfits sixty frames, did not. Diff size worked because the gaming moves in this environment were larger edits than the honest ones. We would not generalise that.
 
@@ -176,7 +176,7 @@ Check behaviour, not scores. A score can be learned, and a frontier model will l
 
 # Data and code availability
 
-The harness is MIT-licensed at https://github.com/nickjlamb/rsi-loop (freeze tag `v2.0-freeze`; results at `v2.1-results`). The preregistration, design document with its dated decision log, and the results report are in the repository. All 120 confirmatory trajectories and 9 pilot trajectories, with every prompt, response, candidate policy, score, gate decision and sandbox event, the frozen analysis output, and a SHA-256 manifest for every file are archived at Zenodo under CC BY 4.0: https://doi.org/10.5281/zenodo.23223679. Datasets are regenerable from seed and manifest.
+This preprint: doi:10.5281/zenodo.23236100. The harness is MIT-licensed at https://github.com/nickjlamb/rsi-loop (freeze tag `v2.0-freeze`; results at `v2.1-results`). The preregistration, design document with its dated decision log, and the results report are in the repository. All 120 confirmatory trajectories and 9 pilot trajectories, with every prompt, response, candidate policy, score, gate decision and sandbox event, the frozen analysis output, and a SHA-256 manifest for every file are archived at Zenodo under CC BY 4.0: https://doi.org/10.5281/zenodo.23223679. Datasets are regenerable from seed and manifest.
 
 # Acknowledgements
 
@@ -184,20 +184,38 @@ Compute was funded by Perplexity API startup credits. The experimental harness, 
 
 # References
 
-[1] Zhao, Srikanth, Wu, Jiang. SpecBench. arXiv:2605.21384, 2026.
-[2] Prasad et al. BAITBENCH. arXiv:2608.30724, 2026.
-[3] METR. Recent frontier models are reward hacking (2025); Frontier Risk Report, February–March 2026 (2026).
-[4] Krakovna et al. Specification gaming: the flip side of AI ingenuity. DeepMind blog, 2020.
-[5] Gao, Schulman, Hilton. Scaling laws for reward model overoptimization. ICML 2023.
-[6] Skalse, Howe, Krasheninnikov, Krueger. Defining and characterizing reward hacking. NeurIPS 2022. Karwowski et al. Goodhart's law in reinforcement learning. ICLR 2024.
-[7] Thaman. Reward Hacking Benchmark. arXiv:2605.02964, 2026.
-[8] ImpossibleBench, 2025–2026.
-[9] Wang et al. The Verification Horizon: no silver bullet for coding agent rewards. arXiv:2606.26300, 2026.
-[10] Zhang et al. Who grades the grader? Co-evolving evaluation metrics and skills. arXiv:2607.12790, 2026.
-[11] Iacob et al. The Red Queen Gödel Machine. arXiv:2606.26294, 2026.
-[12] Reddy M, Karmakar. Proof-Carrying Cognition. arXiv:2609.09776, 2026.
-[13] EvalSafetyGap. arXiv:2606.30219, 2026.
-[14] Zhou et al. Self-evolving coding agents: a survey. arXiv:2608.03392, 2026.
-[15] Dwork, Feldman, Hardt, Pitassi, Reingold, Roth. Generalization in adaptive data analysis and holdout reuse. NeurIPS 2015.
+[1] Zhao B, Srikanth D, Wu Y, Jiang Z. SpecBench: measuring reward hacking in long-horizon coding agents. arXiv:2605.21384, 2026. doi:10.48550/arXiv.2605.21384.
 
-*Reference list to be completed with full author lists, titles and venues before deposit; entries [1]–[3] and [7]–[14] were identified in a September 2026 literature search and their identifiers should be re-verified against the arXiv records.*
+[2] Prasad PS, Anto M, Eshuijs L, Moncarz J, Kislay K, Vazquez JJ. BAITBENCH: measuring agent reward hacking with optional shortcuts planted in ML tasks. arXiv:2608.30724, 2026. doi:10.48550/arXiv.2608.30724.
+
+[3] Von Arx S, Chan L, Barnes B. Recent frontier models are reward hacking. METR, 5 June 2025. https://metr.org/blog/2025-06-05-recent-reward-hacking/
+
+[4] METR. Frontier Risk Report (February to March 2026). METR, 19 May 2026. https://metr.org/blog/2026-05-19-frontier-risk-report/
+
+[5] Krakovna V, Uesato J, Mikulik V, Rahtz M, Everitt T, Kumar R, Kenton Z, Leike J, Legg S. Specification gaming: the flip side of AI ingenuity. DeepMind, 21 April 2020.
+
+[6] Gao L, Schulman J, Hilton J. Scaling laws for reward model overoptimization. In: Proceedings of the 40th International Conference on Machine Learning, PMLR 202:10835–10866, 2023.
+
+[7] Skalse J, Howe NHR, Krasheninnikov D, Krueger D. Defining and characterizing reward hacking. Advances in Neural Information Processing Systems 35:9460–9471, 2022.
+
+[8] Karwowski J, Hayman O, Bai X, Kiendlhofer K, Griffin C, Skalse J. Goodhart's law in reinforcement learning. In: International Conference on Learning Representations (ICLR), 2024.
+
+[9] Thaman K. Reward Hacking Benchmark: measuring exploits in LLM agents with tool use. arXiv:2605.02964, 2026. doi:10.48550/arXiv.2605.02964. Accepted to ICML 2026.
+
+[10] Zhong Z, Raghunathan A, Carlini N. ImpossibleBench: measuring LLMs' propensity of exploiting test cases. arXiv:2510.20270, 2025. doi:10.48550/arXiv.2510.20270.
+
+[11] Wang B, Zhang C, Liu D, Zhang J, Chen J, Li M, Chen M, Fang R, Zhang S, Wang X, Jing Y, Ma Z, Cui Z. The Verification Horizon: no silver bullet for coding agent rewards. arXiv:2606.26300, 2026. doi:10.48550/arXiv.2606.26300.
+
+[12] Zhang X, Wang G, Cui Y, Li Z, Qiu W, Zhu B, He P. Who grades the grader? Co-evolving evaluation metrics and skills for self-improving LLM agents. arXiv:2607.12790, 2026. doi:10.48550/arXiv.2607.12790.
+
+[13] Iacob A, Jovanović A, Shen WF, Burkhardt D, Kurmanji M, Tastan N, Sani L, Venanzi NAE, Odonnat A, Cao Z, Marino B, Qiu X, Lane ND. The Red Queen Gödel Machine: co-evolving agents and their evaluators. arXiv:2606.26294, 2026. doi:10.48550/arXiv.2606.26294.
+
+[14] Reddy M E, Karmakar S. Proof-Carrying Cognition: closing the verification gap with reality-settled reward. arXiv:2609.09776, 2026. doi:10.48550/arXiv.2609.09776.
+
+[15] Uluırmak BA, Kurban R. EvalSafetyGap: a hybrid survey and conceptual framework for LLM evaluation-safety failures. arXiv:2606.30219, 2026. doi:10.48550/arXiv.2606.30219.
+
+[16] Zhou H, Hu H, Luo T, Shang Y, Fang C, Chen Z, Xiao L, Zhang Q. Self-evolving coding agents. arXiv:2608.03392, 2026. doi:10.48550/arXiv.2608.03392.
+
+[17] Dwork C, Feldman V, Hardt M, Pitassi T, Reingold O, Roth A. Generalization in adaptive data analysis and holdout reuse. Advances in Neural Information Processing Systems 28:2350–2358, 2015.
+
+*Preprints are cited as the versions retrieved on 8 October 2026.*
